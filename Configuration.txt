@@ -1,2 +1,2 @@
-joueurparequipe=1
+joueurparequipe=2
 nbrencontre=3
