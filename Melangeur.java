@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +21,7 @@ import javax.swing.JOptionPane;
 
 public class Melangeur {
 
-	private static boolean DEBUG = true;
+	private static boolean DEBUG = false;
 
 	public Random rand = new Random();
 
@@ -30,11 +32,12 @@ public class Melangeur {
 	private List<Joueur> listeJoueur = new ArrayList<Joueur>();
 
 	private Map<Joueur, Set<Joueur>> partenairesList = new HashMap<Joueur, Set<Joueur>>();
-	private Set<Joueur> joueurInamovibles = new HashSet<Joueur>();
-	private Set<Joueur> joueurBougeant = new HashSet<Joueur>();
-	
+	private List<Joueur> joueurInamovibles = new ArrayList<Joueur>();
+	private List<Joueur> joueurBougeant = new ArrayList<Joueur>();
 
-	private List<Tour> result = new ArrayList<Tour>();
+	private Date startDate = new Date();
+
+	private List<Tour> tours = new ArrayList<Tour>();
 	
 	public static ThreadLocal<Long> threadLocal = new ThreadLocal<Long>();
 
@@ -55,10 +58,6 @@ public class Melangeur {
 			props.load(fis);
 			nb_joueur_equipe = Integer.parseInt((String) props.get("joueurparequipe"));
 			nb_rencontre = Integer.parseInt((String) props.get("nbrencontre"));
-			try {
-				DEBUG = Boolean.parseBoolean((String) props.get("debug"));
-			} catch (Exception localException) {
-			}
 		} catch (NumberFormatException e1) {
 			JOptionPane.showMessageDialog(null, "Le fichier de configuration est mal ecrit : impossible de lire un parametre.");
 			return;
@@ -84,7 +83,13 @@ public class Melangeur {
 			return;
 		}
 		log(melange.listeJoueur.size() + " joueurs trouves");
+		
+		if ((melange.listeJoueur.size() % nb_joueur_equipe) != 0) {
+			JOptionPane.showMessageDialog(null, melange.listeJoueur.size() + " joueurs trouves, mais ce n'est pas divisible par " + nb_joueur_equipe);
+			return;
+		}
 
+		
 		log("Calcul des tours...");
 		try {
 			melange.go();
@@ -123,7 +128,7 @@ public class Melangeur {
 	
 	private void triJoueursInamoviblesParTables() {
 
-		for(Tour tour :result) {
+		for(Tour tour :tours) {
 			tour.sortMatch();
 		}
 		
@@ -163,13 +168,14 @@ public class Melangeur {
 
 	private boolean verification() throws VerifError {
 
-		for (Tour tour : this.result) {
+		for (Tour tour : this.tours) {
 			tour.verification();
 		}
 
 		int nb_joueur_voulu = (nb_joueur_equipe * 2 - 1) * nb_rencontre;
 		for (Joueur joueur : this.listeJoueur) {
 			Collection<Joueur> partenaires = (Collection<Joueur>) this.partenairesList.get(joueur);
+			debug("Le joueur " + joueur.getNom() + " a " + partenaires.size() + " partenaires");
 			if (partenaires.size() != nb_joueur_voulu) {
 				throw new VerifError("Le joueur " + joueur.getNom() + " a " + partenaires.size() + " partenaires au lieu de "
 						+ nb_joueur_voulu, threadLocal.get());
@@ -185,15 +191,15 @@ public class Melangeur {
 		FileWriter fileWriter = new FileWriter(fichierSortie);
 
 		if (joueurInamovibles.size() > 0) {
-			fileWriter.write("Joueurs ne bougeant pas : ");
+			fileWriter.write("Joueurs ne bougeant pas : \r\n");
 			for(Joueur neBougePas : joueurInamovibles) {
-				fileWriter.write(neBougePas.getNom() + " (table " + neBougePas.getTable() + "),");
+				fileWriter.write(neBougePas.getNom() + " (table " + (neBougePas.getTable()+1) + ")\r\n");
 			}
 		}
-		fileWriter.write("\r\n\r\n");
+		fileWriter.write("\r\n");
 		
 		int numTour = 1;
-		for (Tour currentTour : this.result) {
+		for (Tour currentTour : this.tours) {
 			fileWriter.write("Tour " + numTour + "\r\n");
 			int numMatch = 1;
 			for (Match currentMatch : currentTour.getMatchs()) {
@@ -228,6 +234,7 @@ public class Melangeur {
 
 		int current_tour = 0;
 		while (current_tour < nb_rencontre) {
+			checkDate();
 
 			Tour currentTour = new Tour();
 
@@ -236,28 +243,27 @@ public class Melangeur {
 			int nb_match_needed = this.listeJoueur.size() / nb_joueur_equipe / 2;
 
 			while (currentTour.getMatchs().size() < nb_match_needed) {
+				checkDate();
 
 				Match currentMatch = new Match();
-
-				boolean matchOk = true;
 
 				int nbJoueurChoisis = 0;
 
 				while (nbJoueurChoisis < nb_joueur_equipe * 2) {
+					checkDate();
 
 					boolean found = false;
-					int j = 0;
-					int dispoSize = dispoListPourCeTour.size() * 20;
-					boolean joueurOk;
 
-					while ((!found) && (j < dispoSize)) {
-						Joueur joueurCandidat = getRandomJoueurIn(dispoListPourCeTour);
-						joueurOk = true;
+					List<Joueur> copyDispoListPourCeTour = new ArrayList<Joueur>(dispoListPourCeTour);
+					Collections.shuffle(copyDispoListPourCeTour);
+					for (Joueur joueurCandidat : copyDispoListPourCeTour) {
+						boolean joueurOk = true;
 						for (Joueur dejaChoisi : currentMatch.getJoueurs()) {
 							if ( (((Set<Joueur>) this.partenairesList.get(dejaChoisi)).contains(joueurCandidat)) //deja rencontre ?
 									|| (joueurCandidat.isFixe() && dejaChoisi.isFixe()) ) { // deux joueurs inamovibles
 								
 								joueurOk = false;
+								break;
 							}
 						}
 						if (joueurOk) {
@@ -269,11 +275,11 @@ public class Melangeur {
 							currentMatch.addJoueur(joueurCandidat);
 							dispoListPourCeTour.remove(joueurCandidat);
 							nbJoueurChoisis++;
+							break;
 						}
 
-						j++;
 					}
-					if ((j >= dispoSize) && (dispoListPourCeTour.size() != 0)) {
+					if ((!found) && (dispoListPourCeTour.size() != 0)) {
 
 						debug("Impossible de trouver un joueur respectant les conditions... Nouvel essai en supprimant un match");
 
@@ -285,9 +291,9 @@ public class Melangeur {
 									((Set<Joueur>) this.partenairesList.get(joueurInMatchToRemove)).remove(partenaire);
 								}
 							}
+							nbJoueurChoisis = 0;
 						}
-
-						matchOk = false;
+						currentMatch.clear();
 
 						int randomMatchInt = this.rand.nextInt(currentTour.getMatchs().size());
 						Match matchToRemove = currentTour.getMatchs().remove(randomMatchInt);
@@ -306,15 +312,13 @@ public class Melangeur {
 					}
 				}
 
-				if (matchOk) {
-					debug("Match ajoute");
-					currentTour.addMatch(currentMatch);
-				}
+				debug("Match ajoute");
+				currentTour.addMatch(currentMatch);
 
 			}
 
 			debug("Tour calcule");
-			this.result.add(currentTour);
+			this.tours.add(currentTour);
 			current_tour++;
 		}
 	}
@@ -382,6 +386,15 @@ public class Melangeur {
 
 	private Joueur getRandomJoueurIn(List<Joueur> chooseInList) {
 		return (Joueur) chooseInList.get(this.rand.nextInt(chooseInList.size()));
+	}
+	
+	private void checkDate() throws VerifError {
+		
+		Date now = new Date();
+		if (now.getTime() - startDate.getTime() > 20000) {
+			throw new VerifError("Calcul trop long", threadLocal.get());
+		}
+		
 	}
 
 }

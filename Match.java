@@ -19,6 +19,11 @@ public class Match implements Comparable<Match> {
 			throw new VerifError("Un match a trop de joueur", Melangeur.threadLocal.get());
 		}
 	}
+	
+	public void clear() {
+		equipe1.clear();
+		equipe2.clear();
+	}
 
 	public List<Joueur> getJoueurs() {
 		List<Joueur> returnList = new ArrayList<Joueur>(this.equipe1);

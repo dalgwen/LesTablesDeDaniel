@@ -1,134 +1,89 @@
-Joueurs ne bougeant pas : 1 (table 18),4 (table 26),65 (table 1),66 (table 11),7 (table 14),77 (table 3),78 (table 17),13 (table 27),76 (table 8),18 (table 22),22 (table 28),24 (table 23),23 (table 9),26 (table 0),32 (table 7),31 (table 12),35 (table 13),36 (table 25),33 (table 29),34 (table 5),39 (table 16),40 (table 24),38 (table 15),51 (table 19),50 (table 10),49 (table 6),55 (table 4),53 (table 21),59 (table 2),61 (table 20),
+Joueurs ne bougeant pas : 
+43 (table 1)
+44 (table 2)
+50 (table 3)
+41 (table 4)
+22 (table 5)
+76 (table 6)
+17 (table 7)
+67 (table 8)
+83 (table 9)
+62 (table 10)
+63 (table 11)
+68 (table 12)
+74 (table 13)
+#15 (table 14)
+#21 (table 15)
 
 Tour 1
-Match 1;26;10;
-Match 2;64;65;
-Match 3;59;63;
-Match 4;48;77;
-Match 5;55;25;
-Match 6;34;73;
-Match 7;49;8;
-Match 8;32;43;
-Match 9;76;27;
-Match 10;23;60;
-Match 11;50;29;
-Match 12;30;66;
-Match 13;52;31;
-Match 14;82;35;
-Match 15;21;7;
-Match 16;57;38;
-Match 17;68;39;
-Match 18;81;78;
-Match 19;6;1;
-Match 20;69;51;
-Match 21;61;45;
-Match 22;53;79;
-Match 23;58;18;
-Match 24;24;62;
-Match 25;70;40;
-Match 26;36;46;
-Match 27;11;4;
-Match 28;13;20;
-Match 29;14;22;
-Match 30;75;33;
-Match 31;9;42;
-Match 32;74;67;
-Match 33;54;37;
-Match 34;5;56;
-Match 35;47;72;
-Match 36;44;12;
-Match 37;41;71;
-Match 38;28;19;
-Match 39;2;80;
-Match 40;16;17;
-Match 41;15;3;
+Match 1;27;57;37;43;
+Match 2;24;44;77;6;
+Match 3;50;51;39;20;
+Match 4;41;28;26;49;
+Match 5;22;34;19;66;
+Match 6;7;52;70;76;
+Match 7;17;5;59;65;
+Match 8;81;8;67;79;
+Match 9;83;48;12;47;
+Match 10;58;30;72;62;
+Match 11;25;63;32;80;
+Match 12;2;38;68;55;
+Match 13;42;14;16;74;
+Match 14;36;46;11;#15;
+Match 15;#21;29;1;56;
+Match 16;61;84;64;71;
+Match 17;53;4;40;73;
+Match 18;45;35;13;23;
+Match 19;33;60;69;10;
+Match 20;31;9;75;78;
+Match 21;18;54;3;82;
 
 
 Tour 2
-Match 1;26;60;
-Match 2;41;65;
-Match 3;59;69;
-Match 4;77;10;
-Match 5;55;75;
-Match 6;71;34;
-Match 7;49;14;
-Match 8;11;32;
-Match 9;76;72;
-Match 10;23;42;
-Match 11;17;50;
-Match 12;66;19;
-Match 13;31;58;
-Match 14;81;35;
-Match 15;6;7;
-Match 16;38;20;
-Match 17;39;45;
-Match 18;64;78;
-Match 19;1;80;
-Match 20;29;51;
-Match 21;61;3;
-Match 22;74;53;
-Match 23;18;70;
-Match 24;24;54;
-Match 25;28;40;
-Match 26;52;36;
-Match 27;63;4;
-Match 28;13;56;
-Match 29;25;22;
-Match 30;33;57;
-Match 31;9;48;
-Match 32;8;47;
-Match 33;73;62;
-Match 34;67;79;
-Match 35;5;68;
-Match 36;46;2;
-Match 37;44;16;
-Match 38;43;12;
-Match 39;30;15;
-Match 40;27;82;
-Match 41;21;37;
+Match 1;43;4;5;66;
+Match 2;58;52;44;40;
+Match 3;33;55;50;81;
+Match 4;79;41;59;70;
+Match 5;27;8;22;51;
+Match 6;29;23;76;75;
+Match 7;61;60;73;17;
+Match 8;36;67;2;65;
+Match 9;78;46;18;83;
+Match 10;34;25;62;42;
+Match 11;63;31;45;6;
+Match 12;13;68;14;71;
+Match 13;53;9;74;26;
+Match 14;57;48;#15;39;
+Match 15;11;80;84;#21;
+Match 16;64;10;16;82;
+Match 17;56;49;32;72;
+Match 18;47;19;7;77;
+Match 19;38;12;69;1;
+Match 20;3;37;30;20;
+Match 21;24;54;35;28;
 
 
 Tour 3
-Match 1;26;5;
-Match 2;65;16;
-Match 3;59;82;
-Match 4;77;68;
-Match 5;55;37;
-Match 6;34;45;
-Match 7;67;49;
-Match 8;20;32;
-Match 9;76;57;
-Match 10;23;12;
-Match 11;63;50;
-Match 12;27;66;
-Match 13;15;31;
-Match 14;46;35;
-Match 15;70;7;
-Match 16;58;38;
-Match 17;43;39;
-Match 18;78;2;
-Match 19;1;19;
-Match 20;9;51;
-Match 21;62;61;
-Match 22;42;53;
-Match 23;18;21;
-Match 24;24;47;
-Match 25;17;40;
-Match 26;48;36;
-Match 27;14;4;
-Match 28;44;13;
-Match 29;28;22;
-Match 30;11;33;
-Match 31;74;75;
-Match 32;69;64;
-Match 33;60;79;
-Match 34;6;72;
-Match 35;56;8;
-Match 36;54;80;
-Match 37;41;81;
-Match 38;30;71;
-Match 39;29;73;
-Match 40;25;52;
-Match 41;10;3;
+Match 1;81;43;77;45;
+Match 2;44;66;73;9;
+Match 3;54;26;8;50;
+Match 4;41;13;75;6;
+Match 5;20;25;22;64;
+Match 6;19;55;40;76;
+Match 7;72;33;2;17;
+Match 8;67;29;31;3;
+Match 9;79;1;83;14;
+Match 10;62;10;65;70;
+Match 11;46;63;24;30;
+Match 12;68;4;82;58;
+Match 13;32;60;84;74;
+Match 14;69;59;35;#15;
+Match 15;61;38;#21;7;
+Match 16;52;12;57;16;
+Match 17;5;42;49;11;
+Match 18;37;56;39;80;
+Match 19;28;23;78;36;
+Match 20;27;34;53;48;
+Match 21;18;47;51;71;
 
 
