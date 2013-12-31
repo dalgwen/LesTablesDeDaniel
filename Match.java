@@ -5,15 +5,12 @@ import java.util.Set;
 
 public class Match implements Comparable<Match> {
 
-	private List<Joueur> equipe1 = new ArrayList<Joueur>();
-	private List<Joueur> equipe2 = new ArrayList<Joueur>();
+	private List<Joueur> equipe = new ArrayList<Joueur>();
 
 	public void addJoueur(Joueur joueur) throws VerifError {
 		
-		if (this.equipe1.size() < Melangeur.nb_joueur_equipe) {
-			this.equipe1.add(joueur);
-		} else if (this.equipe2.size() < Melangeur.nb_joueur_equipe) {
-			this.equipe2.add(joueur);
+		if (this.equipe.size() < 2) {
+			this.equipe.add(joueur);
 		}
 		else {
 			throw new VerifError("Un match a trop de joueur", Melangeur.threadLocal.get());
@@ -21,24 +18,21 @@ public class Match implements Comparable<Match> {
 	}
 	
 	public void clear() {
-		equipe1.clear();
-		equipe2.clear();
+		equipe.clear();
 	}
 
 	public List<Joueur> getJoueurs() {
-		List<Joueur> returnList = new ArrayList<Joueur>(this.equipe1);
-		returnList.addAll(this.equipe2);
+		List<Joueur> returnList = new ArrayList<Joueur>(this.equipe);
 		return returnList;
 	}
 
 	public int getNb() {
-		return this.equipe1.size() + this.equipe2.size();
+		return this.equipe.size();
 	}
 
 	public void verif() throws VerifError {
 		
-		int taillematch = this.equipe1.size() + this.equipe2.size();
-		if (taillematch != Melangeur.nb_joueur_equipe * 2) {
+		if (this.equipe.size() !=  2) {
 			throw new VerifError("Un match n'a pas le bon nombre de joueur", Melangeur.threadLocal.get());
 		}
 
@@ -54,14 +48,13 @@ public class Match implements Comparable<Match> {
 	
 	public Integer getTable() {
 		for (Joueur joueur : getJoueurs()) {
-			if (joueur .isFixe()) {
+			if (joueur.isFixe()) {
 				return joueur.getTable();
 			}
 		}
 		return null;
 	}
 
-	@Override
 	public int compareTo(Match other) {
 
 		Integer otherTable = other.getTable();
