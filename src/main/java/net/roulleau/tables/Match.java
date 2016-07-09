@@ -1,3 +1,4 @@
+package net.roulleau.tables;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -5,7 +6,7 @@ import java.util.Set;
 
 public class Match implements Comparable<Match> {
 
-	private List<Joueur> equipe = new ArrayList<Joueur>();
+	private Set<Joueur> equipe = new HashSet<Joueur>();
 
 	public void addJoueur(Joueur joueur) throws VerifError {
 		
@@ -26,23 +27,10 @@ public class Match implements Comparable<Match> {
 		return returnList;
 	}
 
-	public int getNb() {
-		return this.equipe.size();
-	}
-
 	public void verif() throws VerifError {
 		
 		if (this.equipe.size() !=  2) {
 			throw new VerifError("Un match n'a pas le bon nombre de joueur", Melangeur.threadLocal.get());
-		}
-
-		Set<Joueur> alreadyFound = new HashSet<Joueur>();
-		for (Joueur joueur : getJoueurs()) {
-			boolean ok = alreadyFound.add(joueur);
-			if (!ok) {
-				throw new VerifError("Le joueur " + joueur.getNom()
-						+ " a ete trouvé deux fois dans un match", Melangeur.threadLocal.get());
-			}
 		}
 	}
 	

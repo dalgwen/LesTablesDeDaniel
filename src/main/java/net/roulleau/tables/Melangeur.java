@@ -1,3 +1,4 @@
+package net.roulleau.tables;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -188,7 +189,7 @@ public class Melangeur {
 		if (joueurInamovibles.size() > 0) {
 			fileWriter.write("Joueurs ne pouvant pas bouger  : \r\n");
 			for (Joueur neBougePas : joueurInamovibles) {
-				if (neBougePas.isCantMove()) {
+				if (neBougePas.isFixe()) {
 					fileWriter.write(neBougePas.getNom() + " (table " + (neBougePas.getTable() + 1) + ")\r\n");
 				}
 			}

@@ -1,11 +1,11 @@
+package net.roulleau.tables;
 public class Joueur {
 	
 	private static int currentId = 0;
 	private int id;
 	private String nom;
 	private Integer table = null;
-	private boolean isFixe = false;
-	private boolean cantMove = false;
+	private boolean fixe = false;
 
 	public Joueur(String nom) {
 		this.id = currentId;
@@ -14,10 +14,7 @@ public class Joueur {
 	}
 	public Joueur(String nom, boolean iSfixe, Integer table) {
 		this.id = currentId;
-		this.isFixe = iSfixe;
-		if (iSfixe) {
-			cantMove = true;
-		}
+		this.fixe = iSfixe;
 		currentId += 1;
 		this.nom = nom;
 		this.table = table;
@@ -55,15 +52,9 @@ public class Joueur {
 		this.table = table;
 	}
 	public boolean isFixe() {
-		return isFixe;
+		return fixe;
 	}
 	public void setFixe(boolean isFixe) {
-		this.isFixe = isFixe;
-	}
-	public boolean isCantMove() {
-		return cantMove;
-	}
-	public void setCantMove(boolean cantMove) {
-		this.cantMove = cantMove;
+		this.fixe = isFixe;
 	}
 }

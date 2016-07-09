@@ -1,3 +1,4 @@
+package net.roulleau.tables;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -7,10 +8,6 @@ import java.util.Set;
 public class Tour {
 	private List<Match> matchs = new ArrayList<Match>();
 	
-	public void setMatchs(List<Match> matchs) {
-		this.matchs = matchs;
-	}
-
 	public List<Match> getMatchs() {
 		return this.matchs;
 	}

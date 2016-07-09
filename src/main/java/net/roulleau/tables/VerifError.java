@@ -1,3 +1,4 @@
+package net.roulleau.tables;
 public class VerifError extends Exception {
 	
 	private String message;
