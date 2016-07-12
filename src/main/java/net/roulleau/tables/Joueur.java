@@ -1,4 +1,8 @@
 package net.roulleau.tables;
+
+import java.util.HashSet;
+import java.util.Set;
+
 public class Joueur {
 	
 	private static int currentId = 0;
@@ -6,6 +10,8 @@ public class Joueur {
 	private String nom;
 	private Integer table = null;
 	private boolean fixe = false;
+	
+	private Set<Joueur> adversaires  = new HashSet<>();
 
 	public Joueur(String nom) {
 		this.id = currentId;
@@ -18,6 +24,20 @@ public class Joueur {
 		currentId += 1;
 		this.nom = nom;
 		this.table = table;
+	}
+	
+	public void addAdversaire(Joueur joueur) {
+		adversaires.add(joueur);
+		joueur.addAdversaire(this);
+	}
+	
+	public void resetAdversaire() {
+		adversaires.clear();
+	}
+	
+	public void removeAdversaire(Joueur joueur) {
+		adversaires.remove(joueur);
+		joueur.removeAdversaire(this);
 	}
 
 	public int getId() {

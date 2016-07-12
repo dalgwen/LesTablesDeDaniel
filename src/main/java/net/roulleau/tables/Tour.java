@@ -26,7 +26,7 @@ public class Tour {
 			boolean canAdd = listJoueur.addAll(match.getJoueurs());
 			if (!canAdd)
 				throw new VerifError(
-						"Un joueur apparait plusieurs fois dans un tour", Melangeur.threadLocal.get());
+						"Un joueur apparait plusieurs fois dans un tour");
 		}
 	}
 	

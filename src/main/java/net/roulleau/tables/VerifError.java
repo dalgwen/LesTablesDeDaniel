@@ -2,15 +2,13 @@ package net.roulleau.tables;
 public class VerifError extends Exception {
 	
 	private String message;
-	private Long randomSeed;
 	private static final long serialVersionUID = -5210629427828121465L;
 	
-	public VerifError(String message, Long randomSeed) {
+	public VerifError(String message) {
 		this.message = message;
-		this.randomSeed = randomSeed;
 	}
 
 	public String getMessage() {
-		return this.message + "; random seed = " + randomSeed;
+		return this.message + "; random seed = " + Melangeur.SEED;
 	}
 }

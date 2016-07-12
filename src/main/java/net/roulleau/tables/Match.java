@@ -2,7 +2,9 @@ package net.roulleau.tables;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+
 
 public class Match implements Comparable<Match> {
 
@@ -14,7 +16,7 @@ public class Match implements Comparable<Match> {
 			this.equipe.add(joueur);
 		}
 		else {
-			throw new VerifError("Un match a trop de joueur", Melangeur.threadLocal.get());
+			throw new VerifError("Un match a trop de joueur");
 		}
 	}
 	
@@ -30,34 +32,32 @@ public class Match implements Comparable<Match> {
 	public void verif() throws VerifError {
 		
 		if (this.equipe.size() !=  2) {
-			throw new VerifError("Un match n'a pas le bon nombre de joueur", Melangeur.threadLocal.get());
+			throw new VerifError("Un match n'a pas le bon nombre de joueur");
 		}
 	}
 	
-	public Integer getTable() {
+	public Optional<Integer> getTable() {
 		for (Joueur joueur : getJoueurs()) {
 			if (joueur.isFixe()) {
-				return joueur.getTable();
+				return Optional.of(joueur.getTable());
 			}
 		}
-		return null;
+		return Optional.empty();
 	}
 
 	public int compareTo(Match other) {
 
-		Integer otherTable = other.getTable();
-		Integer myTable = getTable();
-		if (otherTable == null && myTable == null) {
+		if (! other.getTable().isPresent() && ! getTable().isPresent()) {
 			return other.getJoueurs().get(0).getNom().compareTo(getJoueurs().get(0).getNom());
 		}
-		else if (otherTable == null && myTable != null) {
+		else if (! other.getTable().isPresent() && getTable().isPresent()) {
 			return -1;
 		}
-		else if (otherTable != null && myTable == null) {
+		else if (other.getTable().isPresent() &&  ! getTable().isPresent()) {
 			return 1;
 		}
-		else if (otherTable != null && myTable != null) {
-			return myTable - otherTable;
+		else if (other.getTable().isPresent() && getTable().isPresent()) {
+			return getTable().get() - other.getTable().get();
 		}
 		
 		return 0;
