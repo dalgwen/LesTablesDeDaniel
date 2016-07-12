@@ -9,6 +9,6 @@ public class VerifError extends Exception {
 	}
 
 	public String getMessage() {
-		return this.message + "; random seed = " + Melangeur.SEED;
+		return this.message + ".\n Info supplémentaire : random seed = " + LesTablesDeDaniel.SEED;
 	}
 }
