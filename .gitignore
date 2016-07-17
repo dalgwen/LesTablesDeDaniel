@@ -11,5 +11,6 @@ hs_err_pid*
 /.classpath
 /.project
 /bin/
-/bin/
 /target/
+/tirage.jar
+/application*.log
