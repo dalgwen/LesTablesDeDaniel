@@ -1,53 +1,63 @@
-package net.roulleau.tables;
+package net.roulleau.tables.model;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class Joueur {
-	
+
 	private static int currentId = 0;
 	private int id;
-	private String nom;
-	private Integer table = null;
-	private boolean fixe = false;
-	
-	private Set<Joueur> adversaires  = new HashSet<>();
+	private StringProperty nom;
+	private IntegerProperty table = new SimpleIntegerProperty();
+
+	private Set<Joueur> adversaires = new HashSet<>();
 
 	public Joueur(String nom) {
 		this.id = currentId;
 		currentId += 1;
-		this.nom = nom;
+		this.nom = new SimpleStringProperty(nom);
 	}
-	public Joueur(String nom, boolean iSfixe, Integer table) {
+
+	public Joueur(String nom, Integer tableValue) {
 		this.id = currentId;
-		this.fixe = iSfixe;
 		currentId += 1;
-		this.nom = nom;
-		this.table = table;
+		this.nom = new SimpleStringProperty(nom);
+		this.table.setValue(tableValue);
 	}
-	
+
+	public Joueur clone() {
+		return new Joueur(this.getNom(), this.getTable().orElse(null));
+	}
+
 	public void addAdversaire(Joueur adversaire) {
 		adversaires.add(adversaire);
 		adversaire.addAdversaireOnly(this);
 	}
-	
+
 	private void addAdversaireOnly(Joueur joueur) {
 		adversaires.add(joueur);
 	}
-	
+
 	public void resetAdversaire() {
 		adversaires.clear();
 	}
-	
+
 	public void removeAdversaire(Joueur adversaire) {
 		adversaires.remove(adversaire);
 		adversaire.removeAdversaireOnly(this);
 	}
-	
+
 	private void removeAdversaireOnly(Joueur joueur) {
-		adversaires.remove(joueur);		
+		adversaires.remove(joueur);
 	}
+
 	public Set<Joueur> getAdversaires() {
 		return Collections.unmodifiableSet(adversaires);
 	}
@@ -57,6 +67,10 @@ public class Joueur {
 	}
 
 	public String getNom() {
+		return this.nom.get();
+	}
+
+	public StringProperty nomProperty() {
 		return this.nom;
 	}
 
@@ -75,18 +89,26 @@ public class Joueur {
 	}
 
 	public String toString() {
-		return this.nom;
+		return this.nom.get();
 	}
-	public Integer getTable() {
-		return table;
+
+	public Optional<Integer> getTable() {
+		if (table.get() == 0) {
+			return Optional.empty();
+		} else {
+			return Optional.of(table.get());
+		}
 	}
-	public void setTable(Integer table) {
-		this.table = table;
+
+	public IntegerProperty tableProperty() {
+		return this.table;
 	}
+
+	public void setTable(Integer newtableValue) {
+		this.table.setValue(newtableValue);
+	}
+
 	public boolean isFixe() {
-		return fixe;
-	}
-	public void setFixe(boolean isFixe) {
-		this.fixe = isFixe;
+		return table.get() != 0;
 	}
 }

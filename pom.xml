@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>net.roulleau</groupId>
-	<artifactId>tables</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>LesTablesDeDaniel</artifactId>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -45,6 +45,34 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.zenjava</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<version>8.5.0</version>
+				<configuration>
+					<vendor>Gwendal Roulleau</vendor>
+					<mainClass>net.roulleau.tables.LesTablesDeDaniel</mainClass>
+					<jfxMainAppJarName>LesTablesDeDaniel.jar</jfxMainAppJarName>
+					<allPermissions>true</allPermissions>
+				</configuration>
+				<executions>
+					<execution>
+						<!-- required before build-native -->
+						<id>create-jfxjar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>build-jar</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>create-native</id>
+						<phase>package</phase>
+						<goals>
+							<goal>build-native</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

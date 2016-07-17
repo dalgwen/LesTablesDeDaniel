@@ -1,20 +1,10 @@
 package net.roulleau.tables;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,96 +12,36 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.roulleau.tables.model.Joueur;
+import net.roulleau.tables.model.Match;
+import net.roulleau.tables.model.Tour;
+
 public class Melangeur {
 
 	static final Logger LOG = LoggerFactory.getLogger(Melangeur.class);
-	
-	public static final String NEWLINE = "\r\n";
 
 	public Random rand;
 
-	public int nb_rencontre;
-
 	private List<Joueur> listeJoueur;
-
-	private List<Tour> tours;
-	private Set<Integer> tablesPrises;
+	private Collection<Tour> tours;
+	private int nb_rencontre;
 
 	private Date startDate;
 
-	public Melangeur(int nb_rencontre, Long seed) {
+	public Melangeur(Collection<Joueur> listeJoueur, int nb_rencontre, Long seed) {
 
 		rand = new Random(seed);
 
-		listeJoueur = new ArrayList<Joueur>();
-		tours = new ArrayList<Tour>();
+		this.listeJoueur = listeJoueur.stream().map(joueur -> joueur.clone()).collect(Collectors.toList());
+		tours = new ArrayList<Tour>(nb_rencontre);
+		this.nb_rencontre = nb_rencontre;
 
-		tablesPrises = new HashSet<Integer>();
 		startDate = new Date();
 
-		this.nb_rencontre = nb_rencontre;
 	}
 
-	public void readFile() throws IOException, VerifError {
 
-		File listeJoueurFile = new File("Liste joueurs.txt");
-
-		if (listeJoueurFile != null) {
-			listeJoueurFile.exists();
-		}
-		
-		int numTableMaxiInFile = 0;
-		
-		FileReader reader = new FileReader(listeJoueurFile);
-		BufferedReader buffRead = new BufferedReader(reader);
-		try {
-
-			String ligne;
-
-			while ((ligne = buffRead.readLine()) != null) {
-				if (ligne.trim() != null && ligne.trim().length() > 0) {
-					ligne = ligne.trim().replaceAll("\\t", " ");
-					String nomJoueur = ligne;
-					boolean isFixe = false;
-					Integer numTable = null;
-					if (ligne.contains("#")) {
-						isFixe = true;
-						String[] joueurLigneDef = ligne.split("#");
-						nomJoueur = joueurLigneDef[0];
-						if (joueurLigneDef.length == 2) {
-							String numTableS = joueurLigneDef[1];
-							numTable = Integer.parseInt(numTableS);
-							numTableMaxiInFile = Math.max(numTable, numTableMaxiInFile);
-							boolean tableBienAjouter = tablesPrises.add(numTable);
-							if (!tableBienAjouter) {
-								throw new VerifError(
-										"La table " + numTable + " est reservée plusieurs fois dans le fichier des joueurs !");
-							}
-						}
-					}
-					Joueur currentJoueur = new Joueur(nomJoueur, isFixe, numTable);
-					this.listeJoueur.add(currentJoueur);
-				}
-			}
-		} finally {
-			try {
-				buffRead.close();
-			} catch (Exception localException) {
-			}
-		}
-
-		LOG.info(listeJoueur.size() + " joueurs/équipes trouvés");
-
-		if ((listeJoueur.size() % 2) != 0) {
-			throw new VerifError(listeJoueur.size() + " joueurs/équipes trouvés, mais ce n'est pas divisible par 2");
-		}
-		if (numTableMaxiInFile > listeJoueur.size()/2) {
-			throw new VerifError("Une table est numerotée avec un numero trop élevée. Avec ce nombre de joueurs, il n'y a que " + listeJoueur.size()/2 + " tables differentes.");
-		}
-
-	}
-
-	public void go() throws VerifError {
+	public Collection<Tour> go() throws VerifError {
 
 		Collections.shuffle(listeJoueur, rand);
 
@@ -188,6 +118,10 @@ public class Melangeur {
 			this.tours.add(currentTour);
 			current_tour++;
 		}
+		
+		detectionJoueursInamovibles();
+		triJoueursInamoviblesParTables();
+		return tours;
 	}
 
 	private void redispatchJoueurFromAbortedMatch(Match match, List<Joueur> joueursDispoPourCeTour) {
@@ -221,14 +155,16 @@ public class Melangeur {
 		return true;
 	}
 
-	public void triJoueursInamoviblesParTables() {
+	private void triJoueursInamoviblesParTables() {
 		for (Tour tour : tours) {
 			tour.sortMatch();
 		}
 	}
 
-	public void detectionJoueursInamovibles() throws VerifError {
+	private void detectionJoueursInamovibles() throws VerifError {
 
+		Set<Integer> tablesPrises = listeJoueur.stream().map(joueur -> joueur.getTable().orElse(null)).collect(Collectors.toSet());
+		
 		Integer table = 1;
 
 		List<Joueur> joueurInamovibles = new ArrayList<>();
@@ -242,7 +178,7 @@ public class Melangeur {
 
 			if (currentJoueur.isFixe()) {
 				joueurInamovibles.add(currentJoueur);
-				if (currentJoueur.getTable() == null) {
+				if (currentJoueur.getTable() == null || currentJoueur.getTable().equals(0)) {
 					currentJoueur.setTable(table);
 					tablesPrises.add(table);
 				}
@@ -252,73 +188,15 @@ public class Melangeur {
 		}
 
 		if (joueurBougeant.size() + joueurInamovibles.size() != listeJoueur.size()) {
-			throw new VerifError("Joueur inamovibles + joueurs mobiles != joueurs totaux, problèmes !");
+			throw new VerifError("Joueur inamovibles + joueurs mobiles != joueurs totaux, problème !");
 		}
 
-	}
-
-	public void writeResult() throws IOException {
-
-		File fichierSortie = new File("Resultat tirage.txt");
-		FileWriter fileWriter = new FileWriter(fichierSortie);
-
-		List<Joueur> joueurInamovibles = listeJoueur.stream().filter(joueur -> joueur.isFixe()).collect(Collectors.toList());
-		if (joueurInamovibles.size() > 0) {
-			fileWriter.write("Joueurs ne pouvant pas bouger  : " + NEWLINE);
-			for (Joueur neBougePas : joueurInamovibles) {
-				fileWriter.write(neBougePas.getNom() + " (table " + (neBougePas.getTable()) + ")" + NEWLINE);
-			}
-		}
-		fileWriter.write("\r\n");
-
-		int numTour = 1;
-		for (Tour currentTour : this.tours) {
-			fileWriter.write("Tour " + numTour + NEWLINE);
-			int numMatch = 1;
-
-			Map<Integer, Match> matchTableFixe = new HashMap<Integer, Match>();
-			List<Match> matchPeuImporte = new ArrayList<Match>();
-
-			for (Match currentMatch : currentTour.getMatchs()) {
-				try {
-					Integer table = currentMatch.getTable().get();
-					matchTableFixe.put(table, currentMatch);
-				} catch (NoSuchElementException nse) {
-					matchPeuImporte.add(currentMatch);
-				}
-			}
-
-			Iterator<Match> it = matchPeuImporte.iterator();
-			int i = 1;
-			while (it.hasNext() || i < currentTour.getMatchs().size() + 1) {
-
-				Match currentMatch;
-				if (matchTableFixe.get(i) != null) {
-					currentMatch = matchTableFixe.get(i);
-				} else {
-					currentMatch = it.next();
-				}
-				i++;
-
-				fileWriter.write("Match sur table n°" + numMatch + " : ");
-				String joueursS = currentMatch.getJoueurs().stream().map(joueur -> joueur.toString()).collect(Collectors.joining(","));
-				fileWriter.write(joueursS);
-				fileWriter.write(NEWLINE);
-				numMatch++;
-			}
-
-			numTour++;
-			fileWriter.write(NEWLINE);
-			fileWriter.write(NEWLINE);
-		}
-
-		fileWriter.close();
 	}
 
 	private void checkDate() throws VerifError {
 
 		Date now = new Date();
-		if (now.getTime() - startDate.getTime() > 20000) {
+		if (now.getTime() - startDate.getTime() > 50000) {
 			throw new VerifError("Calcul trop long");
 		}
 
@@ -327,6 +205,11 @@ public class Melangeur {
 	public void firstVerif()  throws VerifError {
 		if (nb_rencontre > listeJoueur.size() - 1) {
 			throw new VerifError("Il y a plus de tours que de joueurs disponibles. Impossible de mélanger sans avoir de match en double");
+		}
+		
+		Integer maxTable = listeJoueur.stream().map(joueur -> joueur.getTable().orElse(0)).max((i1, i2) -> i1.compareTo(i2)).get();
+		if (maxTable > listeJoueur.size() / 2) {
+			throw new VerifError("Un numéro de table est trop grand par rapport au nombre de joueur");
 		}
 				
 	}

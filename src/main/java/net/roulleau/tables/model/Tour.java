@@ -1,9 +1,11 @@
-package net.roulleau.tables;
+package net.roulleau.tables.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import net.roulleau.tables.VerifError;
 
 public class Tour {
 	private List<Match> matchs = new ArrayList<Match>();

@@ -1,9 +1,11 @@
-package net.roulleau.tables;
+package net.roulleau.tables.model;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import net.roulleau.tables.VerifError;
 
 
 public class Match implements Comparable<Match> {
@@ -39,7 +41,7 @@ public class Match implements Comparable<Match> {
 	public Optional<Integer> getTable() {
 		for (Joueur joueur : getJoueurs()) {
 			if (joueur.isFixe()) {
-				return Optional.of(joueur.getTable());
+				return joueur.getTable();
 			}
 		}
 		return Optional.empty();
@@ -61,5 +63,9 @@ public class Match implements Comparable<Match> {
 		}
 		
 		return 0;
+	}
+
+	public Set<Joueur> getEquipe() {
+		return equipe;
 	}
 }
