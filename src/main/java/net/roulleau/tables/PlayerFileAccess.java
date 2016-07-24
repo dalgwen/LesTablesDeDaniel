@@ -20,9 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.collections.ObservableList;
-import net.roulleau.tables.model.Joueur;
+import net.roulleau.tables.model.Player;
 import net.roulleau.tables.model.Match;
-import net.roulleau.tables.model.Tour;
+import net.roulleau.tables.model.Turn;
 
 public class PlayerFileAccess {
 
@@ -32,44 +32,41 @@ public class PlayerFileAccess {
 
 	public static final String NEWLINE = "\r\n";
 
-	public static List<Joueur> readPlayers(File listeJoueurFile) throws IOException, VerifError {
+	public static List<Player> readPlayers(File playersListFile) throws IOException, VerifError {
 
-		List<Joueur> listeJoueur = new ArrayList<>();
-		Set<Integer> tablesPrises = new HashSet<Integer>();
+		List<Player> playersList = new ArrayList<>();
+		Set<Integer> occupiedTables = new HashSet<Integer>();
 
-		if (listeJoueurFile == null || !listeJoueurFile.exists()) {
+		if (playersListFile == null || !playersListFile.exists()) {
 			throw new VerifError("Le fichier n'est pas lisible");
 		}
 
-		int numTableMaxiInFile = 0;
-
-		FileReader reader = new FileReader(listeJoueurFile);
+		FileReader reader = new FileReader(playersListFile);
 		BufferedReader buffRead = new BufferedReader(reader);
 		try {
 
-			String ligne;
+			String line;
 
-			while ((ligne = buffRead.readLine()) != null) {
-				if (ligne.trim() != null && ligne.trim().length() > 0) {
-					ligne = ligne.trim().replaceAll("\\t", " ");
-					String nomJoueur = ligne;
-					Integer numTable = null;
-					if (ligne.contains(SEPARATOR)) {
-						String[] joueurLigneDef = ligne.split(SEPARATOR);
-						nomJoueur = joueurLigneDef[0];
-						if (joueurLigneDef.length == 2) {
-							String numTableS = joueurLigneDef[1];
-							numTable = Integer.parseInt(numTableS);
-							numTableMaxiInFile = Math.max(numTable, numTableMaxiInFile);
-							boolean tableBienAjouter = tablesPrises.add(numTable);
-							if (!tableBienAjouter) {
+			while ((line = buffRead.readLine()) != null) {
+				if (line.trim() != null && line.trim().length() > 0) {
+					line = line.trim().replaceAll("\\t", " ");
+					String playerName = line;
+					Integer indexTable = null;
+					if (line.contains(SEPARATOR)) {
+						String[] playerLineDef = line.split(SEPARATOR);
+						playerName = playerLineDef[0];
+						if (playerLineDef.length == 2) {
+							String indexTableS = playerLineDef[1];
+							indexTable = Integer.parseInt(indexTableS);
+							boolean tableCorrectlyAdded = occupiedTables.add(indexTable);
+							if (!tableCorrectlyAdded) {
 								throw new VerifError(
-										"La table " + numTable + " est reservée plusieurs fois dans le fichier des joueurs !");
+										"La table " + indexTable + " est reservée plusieurs fois dans le fichier des joueurs !");
 							}
 						}
 					}
-					Joueur currentJoueur = new Joueur(nomJoueur, numTable);
-					listeJoueur.add(currentJoueur);
+					Player currentJoueur = new Player(playerName, indexTable);
+					playersList.add(currentJoueur);
 				}
 			}
 		} finally {
@@ -79,25 +76,18 @@ public class PlayerFileAccess {
 			}
 		}
 
-		LOG.info(listeJoueur.size() + " joueurs/équipes trouvés");
+		LOG.info(playersList.size() + " joueurs/équipes trouvés");
 
-		if ((listeJoueur.size() % 2) != 0) {
-			throw new VerifError(listeJoueur.size() + " joueurs/équipes trouvés, mais ce n'est pas divisible par 2");
-		}
-		if (numTableMaxiInFile > listeJoueur.size() / 2) {
-			throw new VerifError("Une table est numerotée avec un numero trop élevée. Avec ce nombre de joueurs, il n'y a que "
-					+ listeJoueur.size() / 2 + " tables differentes.");
-		}
 
-		return listeJoueur;
+		return playersList;
 
 	}
 
-	public static void writeResult(File fichierSortie, Collection<Tour> tours) throws IOException {
+	public static void writeResult(File outFile, Collection<Turn> turns) throws IOException {
 
-		FileWriter fileWriter = new FileWriter(fichierSortie);
+		FileWriter fileWriter = new FileWriter(outFile);
 
-		List<Joueur> joueurInamovibles = tours.stream().findFirst().get() // in
+		List<Player> unmovablePlayers = turns.stream().findFirst().get() // in
 																			// first
 																			// tour
 				.getMatchs().stream().flatMap(match -> match.getEquipe().stream()).collect(Collectors.toList()) // browse
@@ -111,52 +101,52 @@ public class PlayerFileAccess {
 																							// fix
 																							// players
 
-		if (joueurInamovibles.size() > 0) {
+		if (unmovablePlayers.size() > 0) {
 			fileWriter.write("Joueurs ne pouvant pas bouger  : " + NEWLINE);
-			for (Joueur neBougePas : joueurInamovibles) {
-				fileWriter.write(neBougePas.getNom() + " (table " + (neBougePas.getTable().get()) + ")" + NEWLINE);
+			for (Player dontmovePlayer : unmovablePlayers) {
+				fileWriter.write(dontmovePlayer.getNom() + " (table " + (dontmovePlayer.getTable().get()) + ")" + NEWLINE);
 			}
 		}
 		fileWriter.write("\r\n");
 
-		int numTour = 1;
-		for (Tour currentTour : tours) {
-			fileWriter.write("Tour " + numTour + NEWLINE);
+		int indexTurn = 1;
+		for (Turn currentTurn : turns) {
+			fileWriter.write("Tour " + indexTurn + NEWLINE);
 			int numMatch = 1;
 
-			Map<Integer, Match> matchTableFixe = new HashMap<Integer, Match>();
-			List<Match> matchPeuImporte = new ArrayList<Match>();
+			Map<Integer, Match> matchFixedTable = new HashMap<Integer, Match>();
+			List<Match> matchWhateverTable = new ArrayList<Match>();
 
-			for (Match currentMatch : currentTour.getMatchs()) {
+			for (Match currentMatch : currentTurn.getMatchs()) {
 				try {
 					Integer table = currentMatch.getTable().get();
-					matchTableFixe.put(table, currentMatch);
+					matchFixedTable.put(table, currentMatch);
 				} catch (NoSuchElementException nse) {
-					matchPeuImporte.add(currentMatch);
+					matchWhateverTable.add(currentMatch);
 				}
 			}
 
-			Iterator<Match> it = matchPeuImporte.iterator();
+			Iterator<Match> it = matchWhateverTable.iterator();
 			int i = 1;
-			while (it.hasNext() || i < currentTour.getMatchs().size() + 1) {
+			while (it.hasNext() || i < currentTurn.getMatchs().size() + 1) {
 
 				Match currentMatch;
-				if (matchTableFixe.get(i) != null) {
-					currentMatch = matchTableFixe.get(i);
+				if (matchFixedTable.get(i) != null) {
+					currentMatch = matchFixedTable.get(i);
 				} else {
 					currentMatch = it.next();
 				}
 				i++;
 
 				fileWriter.write("Match sur table n°" + numMatch + " : ");
-				String joueursS = currentMatch.getJoueurs().stream().map(joueur -> joueur.toString())
+				String playerS = currentMatch.getJoueurs().stream().map(joueur -> joueur.toString())
 						.collect(Collectors.joining(", "));
-				fileWriter.write(joueursS);
+				fileWriter.write(playerS);
 				fileWriter.write(NEWLINE);
 				numMatch++;
 			}
 
-			numTour++;
+			indexTurn++;
 			fileWriter.write(NEWLINE);
 			fileWriter.write(NEWLINE);
 		}
@@ -164,13 +154,13 @@ public class PlayerFileAccess {
 		fileWriter.close();
 	}
 
-	public static void writePlayers(ObservableList<Joueur> joueursObservableList, File file) throws IOException {
+	public static void writePlayers(ObservableList<Player> playersObservableList, File file) throws IOException {
 		
 		try(FileWriter fileWriter = new FileWriter(file)) {
-			for(Joueur joueur : joueursObservableList) {
-				String line = joueur.getNom();
-				if (joueur.getTable().isPresent() && joueur.getTable().get() != 0) {
-					line += SEPARATOR + joueur.getTable().get();
+			for(Player player : playersObservableList) {
+				String line = player.getNom();
+				if (player.getTable().isPresent() && player.getTable().get() != 0) {
+					line += SEPARATOR + player.getTable().get();
 				}
 				line += NEWLINE;
 				fileWriter.write(line);

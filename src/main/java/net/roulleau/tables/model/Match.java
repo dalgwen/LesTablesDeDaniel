@@ -10,9 +10,9 @@ import net.roulleau.tables.VerifError;
 
 public class Match implements Comparable<Match> {
 
-	private Set<Joueur> equipe = new HashSet<Joueur>();
+	private Set<Player> equipe = new HashSet<Player>();
 
-	public void addJoueur(Joueur joueur) throws VerifError {
+	public void addJoueur(Player joueur) throws VerifError {
 		
 		if (this.equipe.size() < 2) {
 			this.equipe.add(joueur);
@@ -26,8 +26,8 @@ public class Match implements Comparable<Match> {
 		equipe.clear();
 	}
 
-	public List<Joueur> getJoueurs() {
-		List<Joueur> returnList = new ArrayList<Joueur>(this.equipe);
+	public List<Player> getJoueurs() {
+		List<Player> returnList = new ArrayList<Player>(this.equipe);
 		return returnList;
 	}
 
@@ -39,7 +39,7 @@ public class Match implements Comparable<Match> {
 	}
 	
 	public Optional<Integer> getTable() {
-		for (Joueur joueur : getJoueurs()) {
+		for (Player joueur : getJoueurs()) {
 			if (joueur.isFixe()) {
 				return joueur.getTable();
 			}
@@ -65,7 +65,7 @@ public class Match implements Comparable<Match> {
 		return 0;
 	}
 
-	public Set<Joueur> getEquipe() {
+	public Set<Player> getEquipe() {
 		return equipe;
 	}
 }

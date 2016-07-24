@@ -10,38 +10,38 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class Joueur {
+public class Player {
 
 	private static int currentId = 0;
 	private int id;
 	private StringProperty nom;
 	private IntegerProperty table = new SimpleIntegerProperty();
 
-	private Set<Joueur> adversaires = new HashSet<>();
+	private Set<Player> adversaires = new HashSet<>();
 
-	public Joueur(String nom) {
+	public Player(String nom) {
 		this.id = currentId;
 		currentId += 1;
 		this.nom = new SimpleStringProperty(nom);
 	}
 
-	public Joueur(String nom, Integer tableValue) {
+	public Player(String nom, Integer tableValue) {
 		this.id = currentId;
 		currentId += 1;
 		this.nom = new SimpleStringProperty(nom);
 		this.table.setValue(tableValue);
 	}
 
-	public Joueur clone() {
-		return new Joueur(this.getNom(), this.getTable().orElse(null));
+	public Player clone() {
+		return new Player(this.getNom(), this.getTable().orElse(null));
 	}
 
-	public void addAdversaire(Joueur adversaire) {
+	public void addAdversaire(Player adversaire) {
 		adversaires.add(adversaire);
 		adversaire.addAdversaireOnly(this);
 	}
 
-	private void addAdversaireOnly(Joueur joueur) {
+	private void addAdversaireOnly(Player joueur) {
 		adversaires.add(joueur);
 	}
 
@@ -49,16 +49,16 @@ public class Joueur {
 		adversaires.clear();
 	}
 
-	public void removeAdversaire(Joueur adversaire) {
+	public void removeAdversaire(Player adversaire) {
 		adversaires.remove(adversaire);
 		adversaire.removeAdversaireOnly(this);
 	}
 
-	private void removeAdversaireOnly(Joueur joueur) {
+	private void removeAdversaireOnly(Player joueur) {
 		adversaires.remove(joueur);
 	}
 
-	public Set<Joueur> getAdversaires() {
+	public Set<Player> getAdversaires() {
 		return Collections.unmodifiableSet(adversaires);
 	}
 
@@ -75,10 +75,10 @@ public class Joueur {
 	}
 
 	public boolean equals(Object other) {
-		if ((other != null) && (!(other instanceof Joueur))) {
+		if ((other != null) && (!(other instanceof Player))) {
 			return false;
 		}
-		if (((Joueur) other).getId() == this.id) {
+		if (((Player) other).getId() == this.id) {
 			return true;
 		}
 		return false;

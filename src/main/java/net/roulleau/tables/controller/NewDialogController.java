@@ -1,14 +1,15 @@
 package net.roulleau.tables.controller;
 
 import javafx.stage.Stage;
-import net.roulleau.tables.HelperUtil;
+import net.roulleau.tables.util.HelperUtil;
+import net.roulleau.tables.util.StageAware;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Button;
 
-public class NewDialogController {
+public class NewDialogController implements StageAware {
 
 	Stage stage;
 

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import net.roulleau.tables.VerifError;
 
-public class Tour {
+public class Turn {
 	private List<Match> matchs = new ArrayList<Match>();
 	
 	public List<Match> getMatchs() {
@@ -23,7 +23,7 @@ public class Tour {
 			match.verif();
 		}
 
-		Set<Joueur> listJoueur = new HashSet<Joueur>();
+		Set<Player> listJoueur = new HashSet<Player>();
 		for (Match match : this.matchs) {
 			boolean canAdd = listJoueur.addAll(match.getJoueurs());
 			if (!canAdd)

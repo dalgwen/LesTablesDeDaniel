@@ -56,7 +56,7 @@
                </tooltip></Button>
         </items>
       </ToolBar>
-      <Button fx:id="goButton" layoutX="134.0" layoutY="592.0" mnemonicParsing="false" onAction="#goClick" prefHeight="50.0" prefWidth="157.0" text="C'est parti !">
+      <Button fx:id="goButton" layoutX="134.0" layoutY="592.0" mnemonicParsing="false" onAction="#goClick" prefHeight="50.0" prefWidth="157.0" text="%button.go">
          <graphic>
             <ImageView fitHeight="41.0" fitWidth="57.0" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -65,6 +65,6 @@
             </ImageView>
          </graphic></Button>
       <Label layoutX="350.0" layoutY="592.0" text="Nombre de tours :" />
-      <Spinner fx:id="nbTourSpinner" layoutX="322.0" layoutY="609.0" />
+      <Spinner fx:id="nbTurnSpinner" layoutX="322.0" layoutY="609.0" />
    </children>
 </AnchorPane>
