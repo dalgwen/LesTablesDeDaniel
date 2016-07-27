@@ -10,38 +10,38 @@ import net.roulleau.tables.VerifError;
 
 public class Match implements Comparable<Match> {
 
-	private Set<Player> equipe = new HashSet<Player>();
+	private Set<Player> team = new HashSet<Player>();
 
-	public void addJoueur(Player joueur) throws VerifError {
+	public void addPlayer(Player player) throws VerifError {
 		
-		if (this.equipe.size() < 2) {
-			this.equipe.add(joueur);
+		if (this.team.size() < 2) {
+			this.team.add(player);
 		}
 		else {
-			throw new VerifError("Un match a trop de joueur");
+			throw new VerifError("error.toomuchplayer");
 		}
 	}
 	
 	public void clear() {
-		equipe.clear();
+		team.clear();
 	}
 
-	public List<Player> getJoueurs() {
-		List<Player> returnList = new ArrayList<Player>(this.equipe);
+	public List<Player> getPlayers() {
+		List<Player> returnList = new ArrayList<Player>(this.team);
 		return returnList;
 	}
 
 	public void verif() throws VerifError {
 		
-		if (this.equipe.size() !=  2) {
-			throw new VerifError("Un match n'a pas le bon nombre de joueur");
+		if (this.team.size() !=  2) {
+			throw new VerifError("error.wrongopponentnumber");
 		}
 	}
 	
 	public Optional<Integer> getTable() {
-		for (Player joueur : getJoueurs()) {
-			if (joueur.isFixe()) {
-				return joueur.getTable();
+		for (Player player : getPlayers()) {
+			if (player.isFix()) {
+				return player.getTable();
 			}
 		}
 		return Optional.empty();
@@ -50,7 +50,7 @@ public class Match implements Comparable<Match> {
 	public int compareTo(Match other) {
 
 		if (! other.getTable().isPresent() && ! getTable().isPresent()) {
-			return other.getJoueurs().get(0).getNom().compareTo(getJoueurs().get(0).getNom());
+			return other.getPlayers().get(0).getName().compareTo(getPlayers().get(0).getName());
 		}
 		else if (! other.getTable().isPresent() && getTable().isPresent()) {
 			return -1;
@@ -65,7 +65,7 @@ public class Match implements Comparable<Match> {
 		return 0;
 	}
 
-	public Set<Player> getEquipe() {
-		return equipe;
+	public Set<Player> getTeam() {
+		return team;
 	}
 }

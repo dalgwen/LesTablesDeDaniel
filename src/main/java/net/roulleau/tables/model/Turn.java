@@ -23,9 +23,9 @@ public class Turn {
 			match.verif();
 		}
 
-		Set<Player> listJoueur = new HashSet<Player>();
+		Set<Player> listPlayer = new HashSet<Player>();
 		for (Match match : this.matchs) {
-			boolean canAdd = listJoueur.addAll(match.getJoueurs());
+			boolean canAdd = listPlayer.addAll(match.getPlayers());
 			if (!canAdd)
 				throw new VerifError(
 						"Un joueur apparait plusieurs fois dans un tour");

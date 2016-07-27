@@ -7,11 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +21,10 @@ import org.slf4j.LoggerFactory;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextFormatter;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -37,7 +39,7 @@ public class HelperUtil {
 	private static final String PREF_REP = "PREF_REP";
 	
 
-	private static final String BUNDLE_NAME = "net.roulleau.tables.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "net.roulleau.tables.messages";
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault());
 
 	
@@ -74,39 +76,46 @@ public class HelperUtil {
 		
 	}
 	
-	public static void error(String message, Object... args) {
-		errorDialog("Erreur",message, args );
+	public static void error(String messageKey, Object... args) {
+		errorDialog(getLocalizedString("error.error"),getLocalizedString(messageKey, args));
 	}
 	
-	public static void critical(String message, Object... args) {
-		errorDialog("Erreur grave",message, args );
+	public static void critical(String messageKey, Object... args) {
+		errorDialog(getLocalizedString("error.critical"),getLocalizedString(messageKey, args));
 	}
 
 	
-	private static void errorDialog(String title, String message, Object... args) {
+	private static void errorDialog(String title, String message) {
 		Alert alert = new Alert(AlertType.ERROR);
 		if (title == null) {
-			title = "Erreur";
+			title = getLocalizedString("error.error");
 		}
 		alert.setTitle(title);
-		String formattedMessage;
-		if (args.length >= 1) {
-			formattedMessage = MessageFormat.format(message, args);
-		}
-		else {
-			formattedMessage = message;
-		}
-		alert.setContentText(formattedMessage);
+		alert.setHeaderText(null);
+		alert.setContentText(message);
 
 		alert.showAndWait();
 	}
 
 
-	public static String getLocalizedString(String key) {
+	public static String getLocalizedString(String key, Object... args) {
+		String messageInBundle = null;
 		try {
-			return RESOURCE_BUNDLE.getString(key);
+			String formattedMessage;
+			messageInBundle = RESOURCE_BUNDLE.getString(key);
+			if ( args != null && args.length >= 1) {
+				formattedMessage = MessageFormat.format(messageInBundle, args);
+			}
+			else {
+				formattedMessage = messageInBundle;
+			}
+			return formattedMessage;
 		} catch (MissingResourceException e) {
-			return '!' + key + '!';
+			String argsS = String.join(",", Arrays.asList(args).stream().map(arg -> arg.toString()).collect(Collectors.toList()));
+			return "!!" + key + "!!" + argsS;
+		} catch (IllegalArgumentException iae) {
+			String argsS = String.join(",", Arrays.asList(args).stream().map(arg -> arg.toString()).collect(Collectors.toList()));
+			return "!" + messageInBundle + "!" + argsS;
 		}
 	}
 	
@@ -134,7 +143,8 @@ public class HelperUtil {
 			inThisStage.setScene(scene);
 		} catch (IOException e) {
 			LOG.error("Whoops", e);  
-			error(HelperUtil.getLocalizedString("error.grave"), HelperUtil.getLocalizedString("error.cannotopen"));    
+			critical("error.cannotopen");
+			System.exit(1);
 		}
 
 		return (T) rootLayout;
@@ -144,12 +154,14 @@ public class HelperUtil {
 	public static <T extends StageAware> T loadFxml(String fxmlPath, String title, Modality modality, Stage owner) {
 		FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(ClassLoader.getSystemResource(fxmlPath));  
+		loader.setResources(HelperUtil.getBundle());
 		Pane page = null;
 		try {
 			page = loader.load();
 		} catch (IOException e) {
-			LOG.error("Oups", e);  
-			critical( "Impossible d'ouvrir l'application");    
+			LOG.error("Whoops", e);  
+			critical("error.cannotopen");    
+			System.exit(1);
 		}
 		// Create the dialog Stage.
 		Stage dialogStage = new Stage();

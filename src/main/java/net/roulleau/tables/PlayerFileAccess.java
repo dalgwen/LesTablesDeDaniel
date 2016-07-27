@@ -8,21 +8,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.collections.ObservableList;
-import net.roulleau.tables.model.Player;
 import net.roulleau.tables.model.Match;
+import net.roulleau.tables.model.Player;
 import net.roulleau.tables.model.Turn;
+import net.roulleau.tables.util.HelperUtil;
 
 public class PlayerFileAccess {
 
@@ -32,13 +31,12 @@ public class PlayerFileAccess {
 
 	public static final String NEWLINE = "\r\n";
 
-	public static List<Player> readPlayers(File playersListFile) throws IOException, VerifError {
+	public static List<Player> readPlayers(File playersListFile) throws IOException {
 
 		List<Player> playersList = new ArrayList<>();
-		Set<Integer> occupiedTables = new HashSet<Integer>();
 
 		if (playersListFile == null || !playersListFile.exists()) {
-			throw new VerifError("Le fichier n'est pas lisible");
+			throw new IOException();
 		}
 
 		FileReader reader = new FileReader(playersListFile);
@@ -58,11 +56,6 @@ public class PlayerFileAccess {
 						if (playerLineDef.length == 2) {
 							String indexTableS = playerLineDef[1];
 							indexTable = Integer.parseInt(indexTableS);
-							boolean tableCorrectlyAdded = occupiedTables.add(indexTable);
-							if (!tableCorrectlyAdded) {
-								throw new VerifError(
-										"La table " + indexTable + " est reservée plusieurs fois dans le fichier des joueurs !");
-							}
 						}
 					}
 					Player currentJoueur = new Player(playerName, indexTable);
@@ -76,7 +69,7 @@ public class PlayerFileAccess {
 			}
 		}
 
-		LOG.info(playersList.size() + " joueurs/équipes trouvés");
+		LOG.info("{} player/team found", playersList.size());
 
 
 		return playersList;
@@ -90,28 +83,30 @@ public class PlayerFileAccess {
 		List<Player> unmovablePlayers = turns.stream().findFirst().get() // in
 																			// first
 																			// tour
-				.getMatchs().stream().flatMap(match -> match.getEquipe().stream()).collect(Collectors.toList()) // browse
+				.getMatchs().stream().flatMap(match -> match.getTeam().stream()).collect(Collectors.toList()) // browse
 																												// all
 																												// match
 																												// and
 																												// get
 																												// players
-				.stream().filter(joueur -> joueur.isFixe()).collect(Collectors.toList()); // get
+				.stream().filter(joueur -> joueur.isFix()).collect(Collectors.toList()); // get
 																							// only
 																							// fix
 																							// players
 
 		if (unmovablePlayers.size() > 0) {
-			fileWriter.write("Joueurs ne pouvant pas bouger  : " + NEWLINE);
+			fileWriter.write(HelperUtil.getLocalizedString("result.playercannotmove") + NEWLINE);
 			for (Player dontmovePlayer : unmovablePlayers) {
-				fileWriter.write(dontmovePlayer.getNom() + " (table " + (dontmovePlayer.getTable().get()) + ")" + NEWLINE);
+				String line = HelperUtil.getLocalizedString("result.unomvableplayerhastable", dontmovePlayer.getName(), (dontmovePlayer.getTable().get()));
+				fileWriter.write(line + NEWLINE);
 			}
 		}
-		fileWriter.write("\r\n");
+		fileWriter.write(NEWLINE);
 
 		int indexTurn = 1;
 		for (Turn currentTurn : turns) {
-			fileWriter.write("Tour " + indexTurn + NEWLINE);
+			String lineTurnDeclare =  HelperUtil.getLocalizedString("result.turn", indexTurn);
+			fileWriter.write(lineTurnDeclare + NEWLINE);
 			int numMatch = 1;
 
 			Map<Integer, Match> matchFixedTable = new HashMap<Integer, Match>();
@@ -138,10 +133,10 @@ public class PlayerFileAccess {
 				}
 				i++;
 
-				fileWriter.write("Match sur table n°" + numMatch + " : ");
-				String playerS = currentMatch.getJoueurs().stream().map(joueur -> joueur.toString())
-						.collect(Collectors.joining(", "));
-				fileWriter.write(playerS);
+				String playerS = currentMatch.getPlayers().stream().map(joueur -> joueur.toString())
+						.collect(Collectors.joining(", "));				
+				String lineMatch = HelperUtil.getLocalizedString("result.matchontable", numMatch, playerS);
+				fileWriter.write(lineMatch);
 				fileWriter.write(NEWLINE);
 				numMatch++;
 			}
@@ -158,7 +153,7 @@ public class PlayerFileAccess {
 		
 		try(FileWriter fileWriter = new FileWriter(file)) {
 			for(Player player : playersObservableList) {
-				String line = player.getNom();
+				String line = player.getName();
 				if (player.getTable().isPresent() && player.getTable().get() != 0) {
 					line += SEPARATOR + player.getTable().get();
 				}

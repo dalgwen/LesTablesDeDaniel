@@ -1,11 +1,16 @@
 package net.roulleau.tables;
 
 import static net.roulleau.tables.util.HelperUtil.error;
+import static net.roulleau.tables.util.HelperUtil.getLocalizedString;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -21,7 +26,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
@@ -30,22 +35,22 @@ import javafx.util.StringConverter;
 import net.roulleau.tables.controller.NewDialogController;
 import net.roulleau.tables.model.Player;
 import net.roulleau.tables.model.Turn;
+import net.roulleau.tables.util.AcceptOnExitTableCell;
 import net.roulleau.tables.util.HelperUtil;
 import net.roulleau.tables.util.StageAware;
 
 public class LesTablesDeDaniel extends Application implements StageAware {
 
-	//TODO L'installeur doit pouvoir mettre une icone sur le bureau
-	//TODO Un uninstall en lien dans le menu démarré ?
-	//TODO Finir l'internationalization
-	//TODO icone de l'application (java haut à gauche)
-	
+	private static final String EXTENSION = "*.tdd";
+
 	public static final Long SEED = new Random().nextLong();
 	// public static final Long SEED = -7786214358487589970L;
 
 	private static final Logger LOG = LoggerFactory.getLogger(LesTablesDeDaniel.class);
 
 	private Stage primaryStage;
+
+	private static String fileToLoad;
 
 	@FXML
 	private Button goButton;
@@ -73,24 +78,44 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 
 	private ObservableList<Player> playersObservableList = FXCollections.observableArrayList();
 
+	@FXML
+	Button plusButton;
+
+	@FXML
+	Button deleteButton;
+
+	@FXML
+	Button upButton;
+
+	@FXML
+	Button downButton;
+
 	public static void main(String[] args) {
+		if (args.length >= 1) {
+			fileToLoad = args[0];
+		}
+
 		launch(args);
 	}
 
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
-		this.primaryStage.setTitle(HelperUtil.getLocalizedString("title"));  
+		this.primaryStage.setTitle(getLocalizedString("title.main"));
 
 		initRootLayout();
+
 	}
 
 	/**
 	 * Initializes the root layout.
 	 */
 	public void initRootLayout() {
-		String pathToFxml = "net/roulleau/tables/view/Main.fxml";  
+		String pathToFxml = "net/roulleau/tables/view/Main.fxml";
 
+		// primaryStage.getIcons().add(new
+		// Image("https://example.com/javaicon.png"));
+		primaryStage.getIcons().add(new Image(ClassLoader.getSystemResourceAsStream("LesTablesDeDaniel.bmp")));
 		HelperUtil.loadFxmlInThisStage(pathToFxml, primaryStage);
 
 		// Show the scene containing the root layout.
@@ -105,21 +130,23 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 
 	@FXML
 	private void initialize() {
+
 		// Initialize the person table with the two columns.
+
 		SpinnerValueFactory.IntegerSpinnerValueFactory spinnerFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10,
 				4);
 		nbTurnSpinner.setValueFactory(spinnerFactory);
 		nbTurnSpinner.setEditable(true);
 		HelperUtil.addSpinnerFormatter(nbTurnSpinner);
 
-		playerColumn.setCellValueFactory(cellData -> cellData.getValue().nomProperty());
-		playerColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+		playerColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+		playerColumn.setCellFactory(AcceptOnExitTableCell.forTableColumn());
 		tableColumn.setCellValueFactory(cellData -> cellData.getValue().tableProperty());
-		tableColumn.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<Number>() {
+		tableColumn.setCellFactory(AcceptOnExitTableCell.forTableColumn(new StringConverter<Number>() {
 
 			@Override
 			public String toString(Number object) {
-				String formatNumber = String.format("%02d", object);  
+				String formatNumber = String.format("%02d", object);
 				return (object != null && !object.equals(new Integer(0))) ? formatNumber : null;
 			}
 
@@ -135,15 +162,24 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 		}));
 
 		playersTable.setItems(playersObservableList);
+
+		if (fileToLoad != null) {
+			Path pathToLoad = Paths.get(fileToLoad);
+			if (Files.exists(pathToLoad) && !Files.isDirectory(pathToLoad) && Files.isReadable(pathToLoad)) {
+				loadFile(pathToLoad.toFile());
+			} else {
+				error("opensavedialog.cannotread", fileToLoad.toString());
+			}
+		}
 	}
 
 	@FXML
 	public void openClick(ActionEvent event) {
 
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(HelperUtil.getLocalizedString("opendialog.openplayerfile"));  
-		ExtensionFilter filter = new ExtensionFilter(HelperUtil.getLocalizedString("opendialog.playerfile"), "*.tdd");    
-		ExtensionFilter filterAll = new ExtensionFilter(HelperUtil.getLocalizedString("opendialog.all"), "*.*");    
+		fileChooser.setTitle(getLocalizedString("opensavedialog.openplayerfile"));
+		ExtensionFilter filter = new ExtensionFilter(getLocalizedString("opensavedialog.playerfile", EXTENSION), EXTENSION);
+		ExtensionFilter filterAll = new ExtensionFilter(getLocalizedString("opensavedialog.all"), "*.*");
 		fileChooser.getExtensionFilters().add(filter);
 		fileChooser.getExtensionFilters().add(filterAll);
 		fileChooser.setInitialDirectory(HelperUtil.getPrefRep().orElse(null));
@@ -151,37 +187,36 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 
 		if (file != null) {
 			HelperUtil.storePrefRep(file);
+			loadFile(file);
+		}
+	}
 
-			Collection<Player> listPlayer;
+	private void loadFile(File file) {
+		Collection<Player> listPlayer;
 
-			LOG.info("Loading players file");  
-			try {
-				listPlayer = PlayerFileAccess.readPlayers(file);
-			} catch (FileNotFoundException e) {
-				error( "Le fichier de joueurs {0} est introuvable", file);    
-				return;
-			} catch (NumberFormatException e) {
-				error( "Un numero de table est incorrectement écrit");  
-				return;
-			} catch (IOException e) {
-				error( "Impossible de lire le fichier fichier de joueurs {0}", file);  
-				return;
-			} catch (VerifError e) {
-				error( e.getMessage());
-				return;
-			}
+		LOG.info("Loading players file");
+		try {
+			listPlayer = PlayerFileAccess.readPlayers(file);
 			playersObservableList.clear();
 			playersObservableList.addAll(listPlayer);
-
+			return;
+		} catch (FileNotFoundException e) {
+			error("opensavedialog.filenotfound", file);
+		} catch (NumberFormatException e) {
+			error("error.malformednumber");
+		} catch (IOException e) {
+			error("opensavedialog.cannotread", file);
 		}
+		return;
+
 	}
 
 	@FXML
 	public void saveClick(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Sauvegarder fichier de joueurs");  
-		ExtensionFilter filter = new ExtensionFilter("Fichier joueurs (*.tdd)", "*.tdd");    
-		ExtensionFilter filterAll = new ExtensionFilter("Tout", "*.*");    
+		fileChooser.setTitle(getLocalizedString("opensavedialog.saveplayerfile"));
+		ExtensionFilter filter = new ExtensionFilter(getLocalizedString("opensavedialog.playerfile", EXTENSION), EXTENSION);
+		ExtensionFilter filterAll = new ExtensionFilter(getLocalizedString("opensavedialog.all"), "*.*");
 		fileChooser.getExtensionFilters().add(filter);
 		fileChooser.getExtensionFilters().add(filterAll);
 		fileChooser.setInitialDirectory(HelperUtil.getPrefRep().orElse(null));
@@ -192,7 +227,7 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 			try {
 				PlayerFileAccess.writePlayers(playersObservableList, file);
 			} catch (IOException e) {
-				error(null, "Impossible de sauvegarder le fichier des joueurs");  
+				error("opensavedialog.cannotwrite");
 				return;
 			}
 		}
@@ -202,19 +237,64 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 	@FXML
 	public void newClick(ActionEvent event) {
 
-		NewDialogController controller = (NewDialogController) HelperUtil.loadFxml("net/roulleau/tables/view/New.fxml", "Nouveau", Modality.APPLICATION_MODAL, primaryStage);
+		NewDialogController controller = (NewDialogController) HelperUtil.loadFxml("net/roulleau/tables/view/New.fxml",
+				getLocalizedString("title.new"), Modality.APPLICATION_MODAL, primaryStage);
 
 		if (controller.isOkClicked()) {
 			int[] information = controller.getResultInformation();
 			playersObservableList.clear();
 			for (int i = 1; i <= information[0]; i++) {
 				Integer tableValue = i <= information[1] ? i : null;
-				String formati = String.format("%03d", i);  
-				Player joueur = new Player(HelperUtil.getLocalizedString("player") + formati, tableValue);  
-				playersObservableList.add(joueur);
+				String formati = String.format("%03d", i);
+				Player player = new Player(getLocalizedString("player") + formati, tableValue);
+				playersObservableList.add(player);
 			}
 		}
 
+	}
+
+	@FXML
+	public void upClick(ActionEvent event) {
+		int selectedIndex = playersTable.getSelectionModel().getSelectedIndex();
+		if (selectedIndex != 0 && selectedIndex != -1) {
+			Collections.swap(playersObservableList, selectedIndex, selectedIndex - 1);
+		}
+	}
+
+	@FXML
+	public void downClick(ActionEvent event) {
+		int selectedIndex = playersTable.getSelectionModel().getSelectedIndex();
+		if (selectedIndex != playersObservableList.size() - 1 && selectedIndex != -1) {
+			Collections.swap(playersObservableList, selectedIndex, selectedIndex + 1);
+		}
+	}
+
+	@FXML
+	public void plusClick(ActionEvent event) {
+		int selectedIndex = playersTable.getSelectionModel().getSelectedIndex();
+		playersObservableList.add(selectedIndex + 1, new Player(getNewNameForPlayer(), null));
+		playersTable.getSelectionModel().select(selectedIndex + 1);
+	}
+
+	@FXML
+	public void deleteClick(ActionEvent event) {
+		int selectedIndex = playersTable.getSelectionModel().getSelectedIndex();
+		if (selectedIndex != -1) {
+			playersObservableList.remove(selectedIndex);
+		}
+	}
+
+	public String getNewNameForPlayer() {
+		for (int i = 1; i < Integer.MAX_VALUE; i++) {
+			String formati = String.format("%03d", i);
+			String newPlayerName = getLocalizedString("player") + formati;
+			if (playersObservableList.stream().anyMatch(player -> player.getName().equals(newPlayerName))) {
+				continue;
+			} else {
+				return newPlayerName;
+			}
+		}
+		return "XXX";
 	}
 
 	@FXML
@@ -222,25 +302,20 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 
 		Collection<Turn> turns;
 
-		if (playersObservableList.size() < 4) {
-			error("Ajouter des joueurs avant de tirer au sort.");  
-			return;
-		}
-
 		int nb_tour = nbTurnSpinner.getValue();
 
-		LOG.info("Demarrage, nombre de tour " + nb_tour + ", graine aléatoire : " + SEED);    
+		LOG.info("Starting, number of turns {}, random seed : {}", nb_tour, SEED);
 
 		Melangeur melange = new Melangeur(playersObservableList, nb_tour, SEED);
 		try {
-			LOG.info("Vérification des paramètres d'entrée");  
+			LOG.info("Input parameter verification...");
 			melange.firstVerification();
-			LOG.info("Calcul des tours...");  
+			LOG.info("Compute...");
 			turns = melange.go();
-			LOG.info("Melange termine, vérification");  
+			LOG.info("Randow draw ended, verification...");
 			melange.verification();
 		} catch (VerifError e) {
-			error(e.getMessage());
+			error(e.getMessageKey(), e.getArgs());
 			return;
 		}
 
@@ -250,13 +325,13 @@ public class LesTablesDeDaniel extends Application implements StageAware {
 
 	private void createAndOpenTempFile(Collection<Turn> turns) {
 		try {
-			LOG.info("Ecriture du resultat dans le fichier \"Resultat tirage.txt\"");  
-			File temp = File.createTempFile("temp-file-name", ".txt");    
+			LOG.info("Writing result in file");
+			File temp = File.createTempFile("temp-file-name", ".txt");
 			PlayerFileAccess.writeResult(temp, turns);
 			java.awt.Desktop.getDesktop().edit(temp);
 		} catch (IOException e) {
-			LOG.error("Impossible d'écrire", e);  
-			error("Impossible d'ecrire le fichier de resultat");  
+			LOG.error("Cannot write", e);
+			error("error.cannotwrite");
 			return;
 		}
 

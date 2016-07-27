@@ -11,60 +11,84 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="656.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.roulleau.tables.LesTablesDeDaniel">
-   <children>
-      <TableView fx:id="playersTable" editable="true" layoutX="36.0" layoutY="89.0" prefHeight="490.0" prefWidth="526.0">
-        <columns>
-          <TableColumn fx:id="playerColumn" prefWidth="327.0" text="Nom du joueur" />
-          <TableColumn fx:id="tableColumn" minWidth="0.0" prefWidth="197.0" text="Table (joueur fixe)" />
-        </columns>
-      </TableView>
-      <ToolBar prefHeight="73.0" prefWidth="600.0">
-        <items>
-          <Button fx:id="newButton" mnemonicParsing="false" onAction="#newClick" prefHeight="41.0" prefWidth="43.0">
-               <graphic>
-                  <ImageView fitHeight="35.0" fitWidth="33.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@new.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="Nouveau" />
-               </tooltip></Button>
-            <Button fx:id="openButton" mnemonicParsing="false" onAction="#openClick" prefHeight="38.0" prefWidth="12.0">
-               <graphic>
-                  <ImageView fitHeight="31.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@open.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="Charger fichier" />
-               </tooltip></Button>
-            <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveClick" prefHeight="27.0" prefWidth="25.0">
-               <graphic>
-                  <ImageView fitHeight="50.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@save.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="Sauvegarder fichier" />
-               </tooltip></Button>
-        </items>
-      </ToolBar>
-      <Button fx:id="goButton" layoutX="134.0" layoutY="592.0" mnemonicParsing="false" onAction="#goClick" prefHeight="50.0" prefWidth="157.0" text="%button.go">
-         <graphic>
-            <ImageView fitHeight="41.0" fitWidth="57.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@go.png" />
-               </image>
-            </ImageView>
-         </graphic></Button>
-      <Label layoutX="350.0" layoutY="592.0" text="Nombre de tours :" />
-      <Spinner fx:id="nbTurnSpinner" layoutX="322.0" layoutY="609.0" />
-   </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="656.0" prefWidth="614.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.roulleau.tables.LesTablesDeDaniel">
+	<children>
+		<TableView fx:id="playersTable" editable="true" layoutX="36.0" layoutY="89.0" prefHeight="490.0" prefWidth="526.0">
+			<columns>
+				<TableColumn fx:id="playerColumn" prefWidth="327.0" text="%column.playername" />
+				<TableColumn fx:id="tableColumn" minWidth="0.0" prefWidth="197.0" text="%column.table" />
+			</columns>
+		</TableView>
+		<ToolBar prefHeight="73.0" prefWidth="614.0">
+			<items>
+				<Button fx:id="newButton" mnemonicParsing="false" onAction="#newClick" prefHeight="41.0" prefWidth="43.0">
+					<graphic>
+						<ImageView fitHeight="35.0" fitWidth="33.0" pickOnBounds="true" preserveRatio="true">
+							<image>
+								<Image url="@new.png" />
+							</image>
+						</ImageView>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%button.new.tooltip" />
+					</tooltip>
+				</Button>
+				<Button fx:id="openButton" mnemonicParsing="false" onAction="#openClick" prefHeight="38.0" prefWidth="12.0">
+					<graphic>
+						<ImageView fitHeight="31.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+							<image>
+								<Image url="@open.png" />
+							</image>
+						</ImageView>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%button.open.tooltip" />
+					</tooltip>
+				</Button>
+				<Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveClick" prefHeight="27.0" prefWidth="25.0">
+					<graphic>
+						<ImageView fitHeight="50.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+							<image>
+								<Image url="@save.png" />
+							</image>
+						</ImageView>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%button.save.tooltip" />
+					</tooltip>
+				</Button>
+			</items>
+		</ToolBar>
+		<Button fx:id="goButton" layoutX="134.0" layoutY="592.0" mnemonicParsing="false" onAction="#goClick" prefHeight="50.0" prefWidth="157.0" text="%button.go">
+			<graphic>
+				<ImageView fitHeight="41.0" fitWidth="57.0" pickOnBounds="true" preserveRatio="true">
+					<image>
+						<Image url="@go.png" />
+					</image>
+				</ImageView>
+			</graphic>
+		</Button>
+		<Label layoutX="350.0" layoutY="592.0" text="%spinner.nbturn" />
+		<Spinner fx:id="nbTurnSpinner" layoutX="322.0" layoutY="609.0" />
+		<Button fx:id="plusButton" layoutX="574.0" layoutY="303.0" mnemonicParsing="false" onAction="#plusClick" text="+">
+			<tooltip>
+				<Tooltip text="%button.plus.tooltip" />
+			</tooltip>
+		</Button>
+		<Button fx:id="deleteButton" layoutX="574.0" layoutY="334.0" mnemonicParsing="false" onAction="#deleteClick" prefWidth="25.0" text="-">
+			<tooltip>
+				<Tooltip text="%button.delete.tooltip" />
+			</tooltip>
+		</Button>
+		<Button fx:id="upButton" layoutX="570.0" layoutY="257.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#upClick" prefHeight="32.0" prefWidth="32.0" text=" ⇟ " textOverrun="CLIP" wrapText="true">
+			<tooltip>
+				<Tooltip text="%button.up.tooltip" />
+			</tooltip>
+		</Button>
+		<Button fx:id="downButton" layoutX="571.0" layoutY="375.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#downClick" prefHeight="32.0" prefWidth="32.0" text="⇞ ">
+			<tooltip>
+				<Tooltip text="%button.down.tooltip" />
+			</tooltip>
+		</Button>
+	</children>
 </AnchorPane>

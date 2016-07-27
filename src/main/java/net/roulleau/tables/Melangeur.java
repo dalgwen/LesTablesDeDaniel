@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -24,17 +25,17 @@ public class Melangeur {
 
 	public Random rand;
 
-	private List<Player> listePlayers;
+	private List<Player> playersList;
 	private Collection<Turn> turns;
 	private int nbTurns;
 
 	private Date startDate;
 
-	public Melangeur(Collection<Player> listeJoueur, int nbTurns, Long seed) {
+	public Melangeur(Collection<Player> playerList, int nbTurns, Long seed) {
 
 		rand = new Random(seed);
 
-		this.listePlayers = listeJoueur.stream().map(joueur -> joueur.clone()).collect(Collectors.toList());
+		this.playersList = playerList.stream().map(player -> player.clone()).collect(Collectors.toList());
 		turns = new ArrayList<Turn>(nbTurns);
 		this.nbTurns = nbTurns;
 
@@ -44,94 +45,90 @@ public class Melangeur {
 
 	public Collection<Turn> go() throws VerifError {
 
-		Collections.shuffle(listePlayers, rand);
+		Collections.shuffle(playersList, rand);
 
 		int current_tour = 0;
 		while (current_tour < nbTurns) {
 			checkDate();
 
-			Turn currentTour = new Turn();
+			Turn currentTurn = new Turn();
 
-			List<Player> joueursDispoPourCeTour = new ArrayList<Player>(this.listePlayers);
+			List<Player> availablePlayersForThisTurn = new ArrayList<Player>(this.playersList);
 
-			int nb_match_needed = this.listePlayers.size() / 2;
+			int nb_match_needed = this.playersList.size() / 2;
 
-			while (currentTour.getMatchs().size() < nb_match_needed) {
+			while (currentTurn.getMatchs().size() < nb_match_needed) {
 				checkDate();
 
 				Match currentMatch = new Match();
 
-				int nbJoueurChoisis = 0;
+				int nbPlayersPicked = 0;
 
-				while (nbJoueurChoisis != 2) {
+				while (nbPlayersPicked != 2) {
 					// checkDate();
 
 					boolean found = false;
 
-					List<Player> copyDispoListPourCeTour = new ArrayList<Player>(joueursDispoPourCeTour);
-					Collections.shuffle(copyDispoListPourCeTour, rand);
-					for (Player joueurCandidat : copyDispoListPourCeTour) {
-						boolean joueurOk = true;
-						for (Player dejaChoisi : currentMatch.getJoueurs()) {
-							if (dejaChoisi.getAdversaires().contains(joueurCandidat) // deja
-																						// rencontre
-									|| (joueurCandidat.isFixe() && dejaChoisi.isFixe())) { // deux
-																							// joueurs
-																							// inamovibles
-								joueurOk = false;
+					List<Player> availableListCopyForThisTurn = new ArrayList<Player>(availablePlayersForThisTurn);
+					Collections.shuffle(availableListCopyForThisTurn, rand);
+					for (Player candidatPlayer : availableListCopyForThisTurn) {
+						boolean playerOk = true;
+						for (Player alreadyPicked : currentMatch.getPlayers()) {
+							if (alreadyPicked.getOpponents().contains(candidatPlayer) // // already met
+									|| (candidatPlayer.isFix() && alreadyPicked.isFix())) { // two unmovable players
+								playerOk = false;
 								break;
 							}
 						}
-						if (joueurOk) {
+						if (playerOk) {
 							found = true;
-							for (Player dejaChoisi : currentMatch.getJoueurs()) {
-								dejaChoisi.addAdversaire(joueurCandidat);
+							for (Player alreadyPicked : currentMatch.getPlayers()) {
+								alreadyPicked.addOpponent(candidatPlayer);
 							}
-							currentMatch.addJoueur(joueurCandidat);
-							joueursDispoPourCeTour.remove(joueurCandidat);
-							nbJoueurChoisis++;
+							currentMatch.addPlayer(candidatPlayer);
+							availablePlayersForThisTurn.remove(candidatPlayer);
+							nbPlayersPicked++;
 							break;
 						}
 
 					}
-					if ((!found) && (joueursDispoPourCeTour.size() != 0)) {
+					if ((!found) && (availablePlayersForThisTurn.size() != 0)) {
 
-						LOG.debug(
-								"Impossible de trouver un joueur respectant les conditions... Nouvel essai en supprimant un match");
+						LOG.debug("Cannot found player having requirements... New try by deleting one match");
 
-						redispatchJoueurFromAbortedMatch(currentMatch, joueursDispoPourCeTour);
-						nbJoueurChoisis = 0;
+						redispatchJoueurFromAbortedMatch(currentMatch, availablePlayersForThisTurn);
+						nbPlayersPicked = 0;
 						currentMatch.clear();
 
-						int randomMatchInt = this.rand.nextInt(currentTour.getMatchs().size());
-						Match matchToRemove = currentTour.getMatchs().remove(randomMatchInt);
-						redispatchJoueurFromAbortedMatch(matchToRemove, joueursDispoPourCeTour);
+						int randomMatchInt = this.rand.nextInt(currentTurn.getMatchs().size());
+						Match matchToRemove = currentTurn.getMatchs().remove(randomMatchInt);
+						redispatchJoueurFromAbortedMatch(matchToRemove, availablePlayersForThisTurn);
 
 					}
 				}
 
-				LOG.debug("Match ajouté");
-				currentTour.addMatch(currentMatch);
+				LOG.debug("Match added");
+				currentTurn.addMatch(currentMatch);
 
 			}
 
-			LOG.debug("Tour calculé");
-			this.turns.add(currentTour);
+			LOG.debug("Turn computed");
+			this.turns.add(currentTurn);
 			current_tour++;
 		}
 
-		detectionJoueursInamovibles();
+		detectUnmovablePlayers();
 		sortMatch();
 		return turns;
 	}
 
-	private void redispatchJoueurFromAbortedMatch(Match match, List<Player> joueursDispoPourCeTour) {
-		for (Player joueurInMatchToRemove : match.getJoueurs()) {
-			joueursDispoPourCeTour.add(joueurInMatchToRemove);
+	private void redispatchJoueurFromAbortedMatch(Match match, List<Player> playersAvailableForThisTurn) {
+		for (Player playerInMatchToRemove : match.getPlayers()) {
+			playersAvailableForThisTurn.add(playerInMatchToRemove);
 
-			for (Player partenaire : match.getJoueurs()) {
-				if (!partenaire.equals(joueurInMatchToRemove)) {
-					joueurInMatchToRemove.removeAdversaire(partenaire);
+			for (Player partner : match.getPlayers()) {
+				if (!partner.equals(playerInMatchToRemove)) {
+					playerInMatchToRemove.removeOpponent(partner);
 				}
 			}
 		}
@@ -139,17 +136,16 @@ public class Melangeur {
 
 	public boolean verification() throws VerifError {
 
-		for (Turn tour : this.turns) {
-			tour.verification();
+		for (Turn turn: this.turns) {
+			turn.verification();
 		}
 
-		int nb_joueur_voulu = nbTurns;
-		for (Player joueur : this.listePlayers) {
-			Collection<Player> partenaires = joueur.getAdversaires();
-			LOG.debug("Le joueur " + joueur.getNom() + " a " + partenaires.size() + " partenaires");
-			if (partenaires.size() != nb_joueur_voulu) {
-				throw new VerifError("Le joueur " + joueur.getNom() + " a " + partenaires.size() + " partenaires au lieu de "
-						+ nb_joueur_voulu + " : " + partenaires);
+		int nb_players_wanted = nbTurns;
+		for (Player player : this.playersList) {
+			Collection<Player> partners = player.getOpponents();
+			LOG.debug("Player {} has {} partners" ,player.getName(), partners.size());
+			if (partners.size() != nb_players_wanted) {
+				throw new VerifError("error.wrongplayernumber", player.getName(), partners.size(), nb_players_wanted, partners );
 			}
 		}
 
@@ -157,14 +153,14 @@ public class Melangeur {
 	}
 
 	private void sortMatch() {
-		for (Turn tour : turns) {
-			tour.sortMatch();
+		for (Turn turn : turns) {
+			turn.sortMatch();
 		}
 	}
 
-	private void detectionJoueursInamovibles() throws VerifError {
+	private void detectUnmovablePlayers() throws VerifError {
 
-		Set<Integer> tablesPrises = listePlayers.stream().map(joueur -> joueur.getTable().orElse(null))
+		Set<Integer> tablesUsed = playersList.stream().map(player -> player.getTable().orElse(null))
 				.collect(Collectors.toSet());
 
 		Integer table = 1;
@@ -172,25 +168,25 @@ public class Melangeur {
 		List<Player> unmovablePlayers = new ArrayList<>();
 		List<Player> mobilePlayers = new ArrayList<>();
 
-		for (Player currentPlayer : this.listePlayers) {
+		for (Player currentPlayer : this.playersList) {
 
-			while (tablesPrises.contains(table)) {
+			while (tablesUsed.contains(table)) {
 				table++;
 			}
 
-			if (currentPlayer.isFixe()) {
+			if (currentPlayer.isFix()) {
 				unmovablePlayers.add(currentPlayer);
 				if (currentPlayer.getTable() == null || currentPlayer.getTable().equals(0)) {
 					currentPlayer.setTable(table);
-					tablesPrises.add(table);
+					tablesUsed.add(table);
 				}
 			} else {
 				mobilePlayers.add(currentPlayer);
 			}
 		}
 
-		if (mobilePlayers.size() + unmovablePlayers.size() != listePlayers.size()) {
-			throw new VerifError("Joueur inamovibles + joueurs mobiles != joueurs totaux, problème !");
+		if (mobilePlayers.size() + unmovablePlayers.size() != playersList.size()) {
+			throw new VerifError("error.wrongtotal");
 		}
 
 	}
@@ -199,26 +195,33 @@ public class Melangeur {
 
 		Date now = new Date();
 		if (now.getTime() - startDate.getTime() > LIMIT_TIME_SECONDS) {
-			throw new VerifError("Calcul trop long, je n'arrive pas à aboutir à un résultat satisfaisant les contraintes...");
+			throw new VerifError("error.toomuchcomputing");
 		}
 
 	}
 
 	public void firstVerification() throws VerifError {
-		if (nbTurns > listePlayers.size() - 1) {
-			throw new VerifError(
-					"Il y a plus de tours que de joueurs disponibles. Impossible de mélanger sans avoir de match en double");
+		
+		if (playersList.size() < 4) {
+			throw new VerifError("error.mustaddplayers"); 
+		}
+		
+		if (nbTurns > playersList.size() - 1) {
+			throw new VerifError("error.toomuchturn");
+		}
+		
+		if (! playersList.stream().map(player -> player.getTable().orElse(0)).filter(table -> table != 0).allMatch(new HashSet<>()::add)) {
+			throw new VerifError("error.tabletwice");
 		}
 
-		Integer maxTable = listePlayers.stream().map(joueur -> joueur.getTable().orElse(0)).max((i1, i2) -> i1.compareTo(i2))
+		Integer maxTable = playersList.stream().map(joueur -> joueur.getTable().orElse(0)).max((i1, i2) -> i1.compareTo(i2))
 				.get();
-		if (maxTable > listePlayers.size() / 2) {
-			throw new VerifError("Une table est numerotée avec un numero trop élevée. Avec ce nombre de joueurs, il n'y a que "
-					+ listePlayers.size() / 2 + " tables differentes.");
+		if (maxTable > playersList.size() / 2) {
+			throw new VerifError("error.tablenumbertoohigh", playersList.size() / 2);
 		}	
 
-		if ((listePlayers.size() % 2) != 0) {
-			throw new VerifError(listePlayers.size() + " joueurs/équipes trouvés, mais ce n'est pas divisible par 2");
+		if ((playersList.size() % 2) != 0) {
+			throw new VerifError("error.unevennbplayer",playersList.size());
 		}
 		
 	}

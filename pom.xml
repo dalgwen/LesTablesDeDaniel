@@ -78,7 +78,7 @@
 					<bundler>EXE</bundler>
 					<additionalAppResources>${project.basedir}/additional</additionalAppResources>
 					<bundleArguments>
-						<licenseFile>gplv3.txt</licenseFile>
+						 <licenseFile>gplv3-en.txt</licenseFile>
 						<runtime>D:\Dev\JDK8_32\jre</runtime>
 					</bundleArguments>
 				</configuration>

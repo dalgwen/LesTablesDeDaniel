@@ -14,64 +14,64 @@ public class Player {
 
 	private static int currentId = 0;
 	private int id;
-	private StringProperty nom;
+	private StringProperty name;
 	private IntegerProperty table = new SimpleIntegerProperty();
 
-	private Set<Player> adversaires = new HashSet<>();
+	private Set<Player> opponents = new HashSet<>();
 
-	public Player(String nom) {
+	public Player(String name) {
 		this.id = currentId;
 		currentId += 1;
-		this.nom = new SimpleStringProperty(nom);
+		this.name = new SimpleStringProperty(name);
 	}
 
-	public Player(String nom, Integer tableValue) {
+	public Player(String name, Integer tableValue) {
 		this.id = currentId;
 		currentId += 1;
-		this.nom = new SimpleStringProperty(nom);
+		this.name = new SimpleStringProperty(name);
 		this.table.setValue(tableValue);
 	}
 
 	public Player clone() {
-		return new Player(this.getNom(), this.getTable().orElse(null));
+		return new Player(this.getName(), this.getTable().orElse(null));
 	}
 
-	public void addAdversaire(Player adversaire) {
-		adversaires.add(adversaire);
-		adversaire.addAdversaireOnly(this);
+	public void addOpponent(Player opponent) {
+		opponents.add(opponent);
+		opponent.addOpponentOnly(this);
 	}
 
-	private void addAdversaireOnly(Player joueur) {
-		adversaires.add(joueur);
+	private void addOpponentOnly(Player joueur) {
+		opponents.add(joueur);
 	}
 
-	public void resetAdversaire() {
-		adversaires.clear();
+	public void resetOpponent() {
+		opponents.clear();
 	}
 
-	public void removeAdversaire(Player adversaire) {
-		adversaires.remove(adversaire);
-		adversaire.removeAdversaireOnly(this);
+	public void removeOpponent(Player opponent) {
+		opponents.remove(opponent);
+		opponent.removeOpponentOnly(this);
 	}
 
-	private void removeAdversaireOnly(Player joueur) {
-		adversaires.remove(joueur);
+	private void removeOpponentOnly(Player joueur) {
+		opponents.remove(joueur);
 	}
 
-	public Set<Player> getAdversaires() {
-		return Collections.unmodifiableSet(adversaires);
+	public Set<Player> getOpponents() {
+		return Collections.unmodifiableSet(opponents);
 	}
 
 	public int getId() {
 		return this.id;
 	}
 
-	public String getNom() {
-		return this.nom.get();
+	public String getName() {
+		return this.name.get();
 	}
 
-	public StringProperty nomProperty() {
-		return this.nom;
+	public StringProperty nameProperty() {
+		return this.name;
 	}
 
 	public boolean equals(Object other) {
@@ -89,7 +89,7 @@ public class Player {
 	}
 
 	public String toString() {
-		return this.nom.get();
+		return this.name.get();
 	}
 
 	public Optional<Integer> getTable() {
@@ -108,7 +108,7 @@ public class Player {
 		this.table.setValue(newtableValue);
 	}
 
-	public boolean isFixe() {
+	public boolean isFix() {
 		return table.get() != 0;
 	}
 }

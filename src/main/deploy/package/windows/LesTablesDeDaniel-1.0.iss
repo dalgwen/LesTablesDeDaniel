@@ -27,19 +27,19 @@ DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 ;Optional License
-LicenseFile=gplv3.txt
+LicenseFile=gplv3-en.txt
 ;WinXP or above
 MinVersion=0,5.1 
 OutputBaseFilename={#MyAppShortName}-setup
 Compression=lzma
 SolidCompression=yes
-;PrivilegesRequired=lowest
 SetupIconFile={#MyAppShortName}-{#MyAppVersion}\{#MyAppShortName}-{#MyAppVersion}.ico
 UninstallDisplayIcon={app}\{#MyAppShortName}-{#MyAppVersion}.ico
 UninstallDisplayName={#MyAppShortName}
 WizardImageStretch=No
 WizardSmallImageFile={#MyAppShortName}-{#MyAppVersion}-setup-icon.bmp   
 ArchitecturesInstallIn64BitMode=
+ChangesAssociations=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -56,35 +56,16 @@ Source: "{#MyAppShortName}-{#MyAppVersion}\{#MyAppExeName}"; DestDir: "{app}"; F
 Source: "{#MyAppShortName}-{#MyAppVersion}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppShortName}-{#MyAppVersion}.ico"; Check: returnTrue()
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}";  IconFilename: "{app}\{#MyAppShortName}-{#MyAppVersion}.ico"; Tasks: desktopicon; Check: returnFalse()
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppShortName}-{#MyAppVersion}.ico"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}";  IconFilename: "{app}\{#MyAppShortName}-{#MyAppVersion}.ico"; Tasks: desktopicon
 Name: "{group}\{cm:ProgramOnTheWeb,{#MyAppName}}"; Filename: "{#MyAppURL}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Parameters: "-Xappcds:generatecache"; Check: returnFalse()
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppShortName}}"; Flags: nowait postinstall skipifsilent; Check: returnTrue()
-Filename: "{app}\{#MyAppExeName}"; Parameters: "-install -svcName ""{#MyAppShortName}"" -svcDesc ""{#MyAppShortName}"" -mainExe ""{#MyAppExeName}""  "; Check: returnFalse()
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppShortName}}"; Flags: nowait postinstall skipifsilent;
 
-[UninstallRun]
-Filename: "{app}\{#MyAppExeName} "; Parameters: "-uninstall -svcName {#MyAppShortName} -stopOnUninstall"; Check: returnFalse()
-
-[Code]
-function returnTrue(): Boolean;
-begin
-  Result := True;
-end;
-
-function returnFalse(): Boolean;
-begin
-  Result := False;
-end;
-
-function InitializeSetup(): Boolean;
-begin
-// Possible future improvements:
-//   if version less or same => just launch app
-//   if upgrade => check if same app is running and wait for it to exit
-//   Add pack200/unpack200 support? 
-  Result := True;
-end;  
+[Registry]
+Root: HKCR; Subkey: ".tdd"; ValueType: string; ValueName: ""; ValueData: "TableDeDaniel"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "TableDeDaniel"; ValueType: string; ValueName: ""; ValueData: "Table de Daniel"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "TableDeDaniel\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
+Root: HKCR; Subkey: "TableDeDaniel\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""   

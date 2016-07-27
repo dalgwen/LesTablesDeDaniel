@@ -66,7 +66,7 @@ public class NewDialogController implements StageAware {
 		nbPlayersSpinner.setEditable(true);
 		HelperUtil.addSpinnerFormatter(nbPlayersSpinner);
 
-		SpinnerValueFactory.IntegerSpinnerValueFactory spinnerFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100,
+		SpinnerValueFactory.IntegerSpinnerValueFactory spinnerFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100,
 				2);
 		nbStaticPlayersSpinner.setValueFactory(spinnerFactory);
 		nbStaticPlayersSpinner.setEditable(true);
