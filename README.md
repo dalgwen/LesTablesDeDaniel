@@ -1,3 +1,7 @@
+# Téléchargement :
+ - [Version installable pour Windows](releases/download/1.0/LesTablesDeDaniel-setup.exe)
+ - [Ou version en simple .jar](releases/download/1.0/LesTablesDeDaniel-1.0-jar-with-dependencies.jar)
+
 # Les Tables De Daniel
 
 ## Introduction
