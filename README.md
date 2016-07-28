@@ -19,7 +19,7 @@ Utilisez les boutons "Nouveau", "Charger" ou "Sauvegarder" pour créer, ouvrir o
  - spécifier une contrainte de table
  - éditer la table de joueur en ajoutant, supprimant, ou déplaçant les lignes grâce aux boutons sur la droite de la table.
  
- Cliquez ensuite sur le bouton "C'est parti" pour obtenir les résultats dans un fichier texte ouvert dans une application tierce.
+Cliquez ensuite sur le bouton "C'est parti" pour obtenir les résultats dans un fichier texte ouvert dans une application tierce.
 
 Use the New, Load, or Save button to create, load existing, or save *.tdd (players definition file)
 Edit the table. You can  :
@@ -31,10 +31,10 @@ Then click the Go button to launch external file editor with the computed result
 
 ## History / Histoire
 
-Ce projet est une projet de "commande" demandé par mon père. Qui s'appelle "Daniel", comme vous avez pu le deviner en lisant le titre.
+Ce projet est une projet de "commande" proposé par mon beau-père. Qui s'appelle "Daniel", comme vous avez pu le deviner en lisant le titre.
 C'était un projet à l'origine très simple (encore plus que maintenant) (pure ligne de commande, lecture / écriture de fichier).
 Puis quelques connaissances ont manifesté de l'intérêt. J'ai donc nettoyé le code, ajouter une IHM avec JavaFX, et voilà.
 
-This project starts as a "command" project from my father-in-law. "Daniel" as you could have expected from the title.
+This project starts as a "command" project from my father-in-law. "Daniel" as you could have guessed from the title.
 It was pretty simple (pure command line and, file reading and writing).
 Then some friends manifest interest. So I cleaned the code, added some GUI with JavaFX, and *voilà.*
